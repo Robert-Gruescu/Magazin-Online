@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import Search from "./Search";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -52,32 +53,7 @@ const Navbar = () => {
           </div>
 
           {/* Bara de cautare */}
-          <div className="relative w-full max-w-2xl">
-            <input
-              type="search"
-              placeholder="Incepe o noua cautare"
-              className="w-full rounded-full bg-white px-4 py-2 pr-12 text-sm text-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FF6600]/60"
-            />
-            <button
-              type="button"
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-2 text-[#FF6600] hover:bg-gray-100"
-              aria-label="Cauta"
-            >
-              <svg
-                className="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.3-4.3" />
-              </svg>
-            </button>
-          </div>
+          <Search />
         </div>
 
         {/* Buton Burger pentru Mobil */}
