@@ -1,8 +1,44 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProductsOpen, setIsProductsOpen] = useState(false);
+  const productsMenuRef = useRef(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        productsMenuRef.current &&
+        !productsMenuRef.current.contains(event.target)
+      ) {
+        setIsProductsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const currentCategorySlug = location.pathname.startsWith("/category/")
+    ? location.pathname.split("/")[2]
+    : "";
+
+  const isCategorySelected = (slug) => currentCategorySlug === slug;
+
+  const handleCategoryClick = (slug) => {
+    if (isCategorySelected(slug)) {
+      navigate("/");
+      return;
+    }
+
+    navigate(`/category/${slug}`);
+  };
 
   return (
     <nav className="bg-black text-[#FF6600] p-4 font-sans border-b border-gray-900">
@@ -10,9 +46,9 @@ const Navbar = () => {
         <div className="flex min-w-0 flex-1 items-center gap-4">
           {/* Numele Site-ului */}
           <div className="shrink-0 text-2xl font-bold">
-            <a href="/" className="hover:text-white transition-colors">
+            <Link to="/" className="hover:text-white transition-colors">
               Magazin Online
-            </a>
+            </Link>
           </div>
 
           {/* Bara de cautare */}
@@ -79,9 +115,9 @@ const Navbar = () => {
 
       {/* Bara cu Produse (exact ca in imagine) */}
       <div className="mt-3 hidden md:block">
-        <div className="rounded-lg bg-gradient-to-r from-red-600 via-purple-600 to-blue-600 px-3 py-2">
+        <div className="rounded-lg bg-linear-to-r from-red-600 via-purple-600 to-blue-600 px-3 py-2">
           <div className="flex items-center justify-between gap-4">
-            <div className="relative">
+            <div className="relative" ref={productsMenuRef}>
               <button
                 type="button"
                 onClick={() => setIsProductsOpen((prev) => !prev)}
@@ -113,61 +149,86 @@ const Navbar = () => {
                   className="absolute left-0 z-10 mt-2 w-64 rounded-md bg-white py-2 text-sm text-black shadow-lg ring-1 ring-black/10"
                   role="menu"
                 >
-                  <a
-                    href="/category/fructe"
+                  <button
+                    type="button"
+                    onClick={() => handleCategoryClick("fructe")}
                     className="flex items-center px-4 py-2 hover:bg-gray-100"
                   >
                     <span
-                      className="mr-3 h-4 w-4 rounded border border-gray-300 bg-gray-100"
+                      className={`mr-3 flex h-4 w-4 items-center justify-center rounded border ${
+                        isCategorySelected("fructe")
+                          ? "border-orange-500 bg-orange-500"
+                          : "border-gray-300 bg-gray-100"
+                      }`}
                       aria-hidden="true"
                     />
                     Fructe
-                  </a>
-                  <a
-                    href="/category/legume"
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleCategoryClick("legume")}
                     className="flex items-center px-4 py-2 hover:bg-gray-100"
                   >
                     <span
-                      className="mr-3 h-4 w-4 rounded border border-gray-300 bg-gray-100"
+                      className={`mr-3 flex h-4 w-4 items-center justify-center rounded border ${
+                        isCategorySelected("legume")
+                          ? "border-orange-500 bg-orange-500"
+                          : "border-gray-300 bg-gray-100"
+                      }`}
                       aria-hidden="true"
                     />
                     Legume
-                  </a>
-                  <a
-                    href="/category/bauturi"
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleCategoryClick("bauturi")}
                     className="flex items-center px-4 py-2 hover:bg-gray-100"
                   >
                     <span
-                      className="mr-3 h-4 w-4 rounded border border-gray-300 bg-gray-100"
+                      className={`mr-3 flex h-4 w-4 items-center justify-center rounded border ${
+                        isCategorySelected("bauturi")
+                          ? "border-orange-500 bg-orange-500"
+                          : "border-gray-300 bg-gray-100"
+                      }`}
                       aria-hidden="true"
                     />
                     Bauturi
-                  </a>
-                  <a
-                    href="/category/congelate"
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleCategoryClick("congelate")}
                     className="flex items-center px-4 py-2 hover:bg-gray-100"
                   >
                     <span
-                      className="mr-3 h-4 w-4 rounded border border-gray-300 bg-gray-100"
+                      className={`mr-3 flex h-4 w-4 items-center justify-center rounded border ${
+                        isCategorySelected("congelate")
+                          ? "border-orange-500 bg-orange-500"
+                          : "border-gray-300 bg-gray-100"
+                      }`}
                       aria-hidden="true"
                     />
                     Congelate
-                  </a>
-                  <a
-                    href="/category/carne"
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleCategoryClick("carne")}
                     className="flex items-center px-4 py-2 hover:bg-gray-100"
                   >
                     <span
-                      className="mr-3 h-4 w-4 rounded border border-gray-300 bg-gray-100"
+                      className={`mr-3 flex h-4 w-4 items-center justify-center rounded border ${
+                        isCategorySelected("carne")
+                          ? "border-orange-500 bg-orange-500"
+                          : "border-gray-300 bg-gray-100"
+                      }`}
                       aria-hidden="true"
                     />
                     Carne
-                  </a>
+                  </button>
                 </div>
               )}
             </div>
-            <a
-              href="/cos-cumparaturi"
+            <Link
+              to="/cos-cumparaturi"
               className="ml-auto flex items-center gap-2 rounded-full bg-white/10 px-3 py-2 text-sm font-semibold text-white backdrop-blur hover:bg-white/20"
             >
               <svg
@@ -185,7 +246,7 @@ const Navbar = () => {
                 <path d="M3 4h2l2.5 11h11l2-7H7.2" />
               </svg>
               Cos
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -193,36 +254,36 @@ const Navbar = () => {
       {/* Meniu Mobil - Afișat doar când e deschis */}
       {isOpen && (
         <div className="md:hidden bg-black mt-2 space-y-2 pb-4 px-2 flex flex-col font-semibold border-t border-gray-900 pt-2">
-          <a
-            href="/category/fructe"
+          <Link
+            to="/category/fructe"
             className="hover:text-white py-1 transition-colors"
           >
             Fructe
-          </a>
-          <a
-            href="/category/legume"
+          </Link>
+          <Link
+            to="/category/legume"
             className="hover:text-white py-1 transition-colors"
           >
             Legume
-          </a>
-          <a
-            href="/category/bauturi"
+          </Link>
+          <Link
+            to="/category/bauturi"
             className="hover:text-white py-1 transition-colors"
           >
             Bauturi
-          </a>
-          <a
-            href="/category/congelate"
+          </Link>
+          <Link
+            to="/category/congelate"
             className="hover:text-white py-1 transition-colors"
           >
             Congelate
-          </a>
-          <a
-            href="/category/carne"
+          </Link>
+          <Link
+            to="/category/carne"
             className="hover:text-white py-1 transition-colors"
           >
             Carne
-          </a>
+          </Link>
         </div>
       )}
     </nav>

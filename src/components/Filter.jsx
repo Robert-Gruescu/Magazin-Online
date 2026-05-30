@@ -1,13 +1,20 @@
 import React, { useState } from "react";
 
-const Filter = ({ onSugarFreeChange }) => {
+const Filter = ({ onSugarFreeChange, onBioChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isSugarFreeOnly, setIsSugarFreeOnly] = useState(false);
+  const [isBioOnly, setIsBioOnly] = useState(false);
 
   const handleSugarFreeChange = (event) => {
     const checked = event.target.checked;
     setIsSugarFreeOnly(checked);
     onSugarFreeChange?.(checked);
+  };
+
+  const handleBioChange = (event) => {
+    const checked = event.target.checked;
+    setIsBioOnly(checked);
+    onBioChange?.(checked);
   };
 
   return (
@@ -24,12 +31,13 @@ const Filter = ({ onSugarFreeChange }) => {
           <p className="text-sm text-gray-400">Alege filtre</p>
           <div className="mt-3 flex flex-col gap-3">
             <label className="flex items-center gap-2 text-orange-100">
-              <input type="checkbox" className="h-4 w-4 accent-orange-500" />
+              <input
+                type="checkbox"
+                checked={isBioOnly}
+                onChange={handleBioChange}
+                className="h-4 w-4 accent-orange-500"
+              />
               Bio
-            </label>
-            <label className="flex items-center gap-2 text-orange-100">
-              <input type="checkbox" className="h-4 w-4 accent-orange-500" />
-              Reduceri
             </label>
             <label className="flex items-center gap-2 text-orange-100">
               <input
