@@ -1,5 +1,6 @@
 import React from "react";
 import Navbar from "../components/Navbar";
+import Filter from "../components/Filter";
 
 const Home = () => {
   return (
@@ -12,6 +13,7 @@ const Home = () => {
         <p className="mt-4 text-gray-400">
           Aici veti gasi cele mai bune produse.
         </p>
+        <Filter />
       </div>
     </div>
   );
