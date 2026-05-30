@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 
-const Filter = () => {
+const Filter = ({ onSugarFreeChange }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSugarFreeOnly, setIsSugarFreeOnly] = useState(false);
+
+  const handleSugarFreeChange = (event) => {
+    const checked = event.target.checked;
+    setIsSugarFreeOnly(checked);
+    onSugarFreeChange?.(checked);
+  };
 
   return (
     <div className="mt-8">
@@ -25,7 +32,12 @@ const Filter = () => {
               Reduceri
             </label>
             <label className="flex items-center gap-2 text-orange-100">
-              <input type="checkbox" className="h-4 w-4 accent-orange-500" />
+              <input
+                type="checkbox"
+                checked={isSugarFreeOnly}
+                onChange={handleSugarFreeChange}
+                className="h-4 w-4 accent-orange-500"
+              />
               Fara zahar
             </label>
           </div>
