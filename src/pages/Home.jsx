@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Filter from "../components/Filter";
 import supabase from "../services/supabaseClient";
@@ -11,6 +11,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     let isMounted = true;
@@ -97,10 +98,12 @@ const Home = () => {
         {!loading && !error && filteredProducts.length > 0 && (
           <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
             {filteredProducts.map((product) => (
-              <Link
+              <button
                 key={product.id}
-                to={`/produs/${product.id}`}
-                className="group rounded-xl border border-gray-800 bg-zinc-900/70 p-4 transition hover:border-orange-500/60"
+                type="button"
+                onClick={() => navigate(`/produs/${product.id}`)}
+                className="group w-full cursor-pointer rounded-xl border border-gray-800 bg-zinc-900/70 p-4 text-left transition hover:border-orange-500/60"
+                aria-label={`Vezi produsul ${product.name || ""}`}
               >
                 <div className="aspect-4/3 w-full overflow-hidden rounded-lg border border-gray-800 bg-zinc-800">
                   {product.image_url ? (
@@ -126,7 +129,7 @@ const Home = () => {
                     ? `${product.price} lei`
                     : "Pret indisponibil"}
                 </div>
-              </Link>
+              </button>
             ))}
           </div>
         )}

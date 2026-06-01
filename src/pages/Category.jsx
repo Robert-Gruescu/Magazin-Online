@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import supabase from "../services/supabaseClient";
 
@@ -20,6 +20,7 @@ const Category = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const normalizedSlug = useMemo(() => normalizeName(slug), [slug]);
 
@@ -118,10 +119,12 @@ const Category = () => {
             ) : (
               <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
                 {products.map((product) => (
-                  <Link
+                  <button
                     key={product.id}
-                    to={`/produs/${product.id}`}
-                    className="group rounded-xl border border-gray-800 bg-zinc-900/70 p-4 transition hover:border-orange-500/60"
+                    type="button"
+                    onClick={() => navigate(`/produs/${product.id}`)}
+                    className="group w-full cursor-pointer rounded-xl border border-gray-800 bg-zinc-900/70 p-4 text-left transition hover:border-orange-500/60"
+                    aria-label={`Vezi produsul ${product.name || ""}`}
                   >
                     <div className="aspect-4/3 w-full overflow-hidden rounded-lg border border-gray-800 bg-zinc-800">
                       {product.image_url ? (
@@ -155,7 +158,7 @@ const Category = () => {
                           : " • Cu zahar"
                         : ""}
                     </div>
-                  </Link>
+                  </button>
                 ))}
               </div>
             )}
