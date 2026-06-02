@@ -13,13 +13,13 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     e.stopPropagation();
+
     console.log("=== SUBMIT APELAT ===");
     console.log("email value:", JSON.stringify(email));
     console.log("password value:", JSON.stringify(password));
     console.log("state:", state);
 
-    if (state === "submitting") return; // previne dublu submit
-
+    if (state === "submitting") return;
     setMessage("");
 
     if (!isSupabaseConfigured || !supabase) {
@@ -39,10 +39,13 @@ function Login() {
 
     setState("submitting");
 
+    console.log("=== INCEPE SIGNIN ===");
     const { data, error } = await supabase.auth.signInWithPassword({
       email: trimmedEmail,
       password: trimmedPassword,
     });
+    console.log("signin data:", data);
+    console.log("signin error:", error);
 
     if (error) {
       setState("error");
@@ -50,11 +53,14 @@ function Login() {
       return;
     }
 
+    console.log("=== INCEPE PROFILE CHECK ===");
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", data.user.id)
       .maybeSingle();
+    console.log("profile:", profile);
+    console.log("profileError:", profileError);
 
     if (profileError) {
       await supabase.auth.signOut();
@@ -70,6 +76,7 @@ function Login() {
       return;
     }
 
+    console.log("=== NAVIGATE ===");
     navigate("/");
   };
 

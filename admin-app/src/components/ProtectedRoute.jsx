@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { supabase, isSupabaseConfigured } from "../supabaseClient";
 
 function ProtectedRoute({ children }) {
   const [status, setStatus] = useState("checking");
+  const resolvedRef = useRef(false);
 
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) {
@@ -26,16 +27,24 @@ function ProtectedRoute({ children }) {
       setStatus(profile?.role === "admin" ? "allowed" : "denied");
     };
 
-    // Verifica sesiunea curenta
+    // Verifica sesiunea existenta
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (resolvedRef.current) return;
+      resolvedRef.current = true;
       checkSession(session);
     });
 
-    // Asculta schimbarile de sesiune
+    // Prinde sesiunea noua imediat dupa login
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      checkSession(session);
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("onAuthStateChange:", event, session?.user?.email);
+      if (event === "SIGNED_IN" && session) {
+        resolvedRef.current = true;
+        setStatus("allowed");
+      } else if (event === "SIGNED_OUT" && resolvedRef.current) {
+        setStatus("denied");
+      }
     });
 
     return () => subscription.unsubscribe();
