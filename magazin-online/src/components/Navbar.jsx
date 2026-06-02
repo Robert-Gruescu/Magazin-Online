@@ -168,7 +168,7 @@ const Navbar = () => {
                     className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-ink/70 transition hover:bg-ink/4 hover:text-ink"
                   >
                     <span
-                      className={`h-3.5 w-3.5 flex-shrink-0 rounded border transition ${
+                      className={`h-3.5 w-3.5 shrink-0 rounded border transition ${
                         isCategorySelected(cat.slug)
                           ? "border-ink bg-ink"
                           : "border-ink/20 bg-transparent"
@@ -221,7 +221,7 @@ const Navbar = () => {
                 }`}
               >
                 <span
-                  className={`h-3.5 w-3.5 flex-shrink-0 rounded border ${
+                  className={`h-3.5 w-3.5 shrink-0 rounded border ${
                     isCategorySelected(cat.slug)
                       ? "border-ink bg-ink"
                       : "border-ink/20"
