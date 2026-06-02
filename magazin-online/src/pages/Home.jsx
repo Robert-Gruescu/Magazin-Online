@@ -31,7 +31,7 @@ const Home = () => {
         supabase
           .from("products")
           .select(
-            "id, name, description, price, image_url, category_id, fara_zahar, bio",
+            "id, name, description, price, image_url, category_id, fara_zahar, bio, stock",
           ),
         supabase.from("categories").select("id, name"),
       ]);
@@ -67,23 +67,26 @@ const Home = () => {
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
+      // Ascunde produsele cu stoc 0
+      if (
+        product.stock !== null &&
+        product.stock !== undefined &&
+        product.stock <= 0
+      ) {
+        return false;
+      }
+
       if (selectedCategory) {
         const cat = categories.find(
           (c) => normalizeName(c.name) === selectedCategory,
         );
-
         if (cat && product.category_id !== cat.id) {
           return false;
         }
       }
 
-      if (sugarFreeOnly && !product.fara_zahar) {
-        return false;
-      }
-
-      if (bioOnly && !product.bio) {
-        return false;
-      }
+      if (sugarFreeOnly && !product.fara_zahar) return false;
+      if (bioOnly && !product.bio) return false;
 
       if (searchQuery) {
         return normalizeName(product.name).includes(searchQuery);
@@ -165,7 +168,6 @@ const Home = () => {
               <p className="text-sm text-ink/40">
                 Nu există produse pentru filtrele selectate.
               </p>
-
               <button
                 type="button"
                 onClick={() => {
@@ -182,67 +184,82 @@ const Home = () => {
 
           {!loading && !error && filteredProducts.length > 0 && (
             <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredProducts.map((product) => (
-                <button
-                  key={product.id}
-                  type="button"
-                  onClick={() => navigate(`/produs/${product.id}`)}
-                  className="group w-full cursor-pointer rounded-3xl border border-white/60 bg-white/85 text-left shadow-soft backdrop-blur transition hover:-translate-y-0.5"
-                  aria-label={`Vezi produsul ${product.name || ""}`}
-                >
-                  <div className="aspect-4/3 w-full overflow-hidden rounded-t-3xl bg-ink/5">
-                    {product.image_url ? (
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-xs text-ink/30">
-                        Imagine indisponibilă
+              {filteredProducts.map((product) => {
+                const stock = product.stock;
+                const isLowStock =
+                  stock !== null &&
+                  stock !== undefined &&
+                  stock > 0 &&
+                  stock <= 10;
+
+                return (
+                  <button
+                    key={product.id}
+                    type="button"
+                    onClick={() => navigate(`/produs/${product.id}`)}
+                    className="group relative w-full cursor-pointer rounded-3xl border border-white/60 bg-white/85 text-left shadow-soft backdrop-blur transition hover:-translate-y-0.5"
+                    aria-label={`Vezi produsul ${product.name || ""}`}
+                  >
+                    {/* Badge stoc scăzut */}
+                    {isLowStock && (
+                      <div className="absolute right-3 top-3 z-10 rounded-full bg-rose-500 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
+                        Ultimele {stock} {stock === 1 ? "produs" : "produse"}
                       </div>
                     )}
-                  </div>
 
-                  <div className="p-4">
-                    <h3 className="font-display text-lg text-ink">
-                      {product.name}
-                    </h3>
+                    <div className="aspect-4/3 w-full overflow-hidden rounded-t-3xl bg-ink/5">
+                      {product.image_url ? (
+                        <img
+                          src={product.image_url}
+                          alt={product.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-xs text-ink/30">
+                          Imagine indisponibilă
+                        </div>
+                      )}
+                    </div>
 
-                    {product.description && (
-                      <p className="mt-1 line-clamp-2 text-xs text-ink/50">
-                        {product.description}
-                      </p>
-                    )}
+                    <div className="p-4">
+                      <h3 className="font-display text-lg text-ink">
+                        {product.name}
+                      </h3>
 
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="text-base font-semibold text-ink">
-                        {product.price != null
-                          ? `${product.price} lei`
-                          : "Preț indisponibil"}
-                      </span>
+                      {product.description && (
+                        <p className="mt-1 line-clamp-2 text-xs text-ink/50">
+                          {product.description}
+                        </p>
+                      )}
 
-                      <div className="flex items-center gap-2">
-                        {product.bio && (
-                          <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
-                            Bio
-                          </span>
-                        )}
+                      <div className="mt-4 flex items-center justify-between">
+                        <span className="text-base font-semibold text-ink">
+                          {product.price != null
+                            ? `${product.price} lei`
+                            : "Preț indisponibil"}
+                        </span>
 
-                        {product.fara_zahar && (
-                          <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
-                            Fără zahăr
-                          </span>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {product.bio && (
+                            <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+                              Bio
+                            </span>
+                          )}
+                          {product.fara_zahar && (
+                            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
+                              Fără zahăr
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-3 w-full rounded-full bg-ink py-2 text-center text-xs font-semibold text-white transition group-hover:bg-ink/80">
+                        Vezi produs
                       </div>
                     </div>
-
-                    <div className="mt-3 w-full rounded-full bg-ink py-2 text-center text-xs font-semibold text-white transition group-hover:bg-ink/80">
-                      Vezi produs
-                    </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>

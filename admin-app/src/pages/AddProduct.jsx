@@ -7,6 +7,7 @@ const initialForm = {
   name: "",
   description: "",
   price: "",
+  stock: "",
   imageUrl: "",
   faraZahar: false,
   bio: false,
@@ -64,7 +65,6 @@ function AddProduct() {
       error: "Nu am putut incarca categoriile.",
       missing: "Supabase nu este configurat pentru citirea categoriilor.",
     };
-
     return states[categoriesState] ?? states.idle;
   }, [categoriesState, categories.length]);
 
@@ -88,6 +88,7 @@ function AddProduct() {
 
     const trimmedName = formValues.name.trim();
     const priceValue = Number.parseFloat(formValues.price);
+    const stockValue = Number.parseInt(formValues.stock, 10);
     const categoryId = Number.parseInt(formValues.categoryId, 10);
 
     if (!formValues.categoryId) {
@@ -115,6 +116,7 @@ function AddProduct() {
       name: trimmedName,
       description: formValues.description.trim() || null,
       price: Number(priceValue.toFixed(2)),
+      stock: Number.isFinite(stockValue) ? stockValue : 0,
       image_url: formValues.imageUrl.trim() || null,
       fara_zahar: formValues.faraZahar,
       bio: formValues.bio,
@@ -249,17 +251,32 @@ function AddProduct() {
 
                 <label className="grid gap-2">
                   <span className="text-xs uppercase tracking-[0.2em] text-ink/50">
-                    Imagine (URL)
+                    Stoc (buc)
                   </span>
                   <input
-                    type="url"
-                    value={formValues.imageUrl}
-                    onChange={handleChange("imageUrl")}
-                    placeholder="https://"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formValues.stock}
+                    onChange={handleChange("stock")}
+                    placeholder="0"
                     className="rounded-2xl border border-ink/10 bg-white/90 px-4 py-3 text-sm"
                   />
                 </label>
               </div>
+
+              <label className="grid gap-2">
+                <span className="text-xs uppercase tracking-[0.2em] text-ink/50">
+                  Imagine (URL)
+                </span>
+                <input
+                  type="url"
+                  value={formValues.imageUrl}
+                  onChange={handleChange("imageUrl")}
+                  placeholder="https://"
+                  className="rounded-2xl border border-ink/10 bg-white/90 px-4 py-3 text-sm"
+                />
+              </label>
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="flex items-start gap-3 rounded-2xl border border-ink/10 bg-white/80 p-4">
@@ -340,6 +357,7 @@ function AddProduct() {
                 <li>created_at se seteaza automat la salvare.</li>
                 <li>fara_zahar si bio sunt valori boolean.</li>
                 <li>image_url este optional si poate ramane gol.</li>
+                <li>stock reprezinta cantitatea disponibila in depozit.</li>
               </ul>
             </div>
 

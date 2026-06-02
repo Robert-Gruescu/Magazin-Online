@@ -66,7 +66,7 @@ const Navbar = () => {
             Cont
           </Link>
           <Link
-            to="/cos-cumparaturi"
+            to="/cart"
             className="flex items-center gap-2 rounded-full bg-ink px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-black transition hover:bg-ink/80"
           >
             <svg
@@ -239,7 +239,7 @@ const Navbar = () => {
                 Cont
               </Link>
               <Link
-                to="/cos-cumparaturi"
+                to="/cart"
                 className="flex items-center gap-2 rounded-full bg-ink px-4 py-1.5 text-xs font-semibold text-white"
               >
                 <svg
