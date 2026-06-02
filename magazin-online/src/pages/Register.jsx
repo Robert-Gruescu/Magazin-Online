@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { supabase, isSupabaseConfigured } from "../supabaseClient";
+import supabase from "../services/supabaseClient";
 
 const initialForm = {
   firstName: "",
@@ -31,7 +31,7 @@ function Register() {
     e.preventDefault();
     setMessage("");
 
-    if (!isSupabaseConfigured || !supabase) {
+    if (!supabase) {
       setState("error");
       setMessage("Supabase nu este configurat. Verifică .env.local.");
       return;
@@ -263,13 +263,17 @@ function Register() {
               <h2 className="font-display text-2xl text-ink">Tip cont</h2>
               <div className="mt-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-ink/65">Înregistrat din aplicație</span>
+                  <span className="text-sm text-ink/65">
+                    Înregistrat din aplicație
+                  </span>
                   <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
                     Client
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-ink/65">Creat din Supabase</span>
+                  <span className="text-sm text-ink/65">
+                    Creat din Supabase
+                  </span>
                   <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
                     Admin
                   </span>
