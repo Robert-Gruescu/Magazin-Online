@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import supabase from "../services/supabaseClient";
+import { useFavorites } from "../context/FavoritesContext";
+import { useCart } from "../context/CartContext";
 
 const Product = () => {
   const { id } = useParams();
@@ -10,6 +12,8 @@ const Product = () => {
   const [error, setError] = useState("");
   const [quantity, setQuantity] = useState(1);
   const navigate = useNavigate();
+  const { favorites, toggleFavorite, isFavorite } = useFavorites();
+  const { addItem } = useCart();
 
   useEffect(() => {
     let isMounted = true;
@@ -201,9 +205,45 @@ const Product = () => {
                 <div className="mt-5 flex flex-col gap-3">
                   <button
                     type="button"
-                    className="w-full rounded-full bg-ink py-3 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5"
+                    onClick={() => addItem(product, quantity)}
+                    className="flex items-center justify-center gap-2 w-full rounded-full border py-3 transition border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
                   >
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle cx="9" cy="20" r="1" />
+                      <circle cx="17" cy="20" r="1" />
+                      <path d="M3 4h2l2.5 11h11l2-7H7.2" />
+                    </svg>
                     Adaugă în coș
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleFavorite(product)}
+                    className={`flex items-center justify-center rounded-full border py-3 transition ${
+                      isFavorite(product.id)
+                        ? "border-rose-200 bg-rose-50 text-rose-500"
+                        : "border-ink/10 bg-white/70 text-ink/40 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-400"
+                    }`}
+                    aria-label={
+                      isFavorite(product.id)
+                        ? "Șterge din favorite"
+                        : "Adaugă la favorite"
+                    }
+                  >
+                    <svg
+                      className="h-5 w-5"
+                      fill={isFavorite(product.id) ? "currentColor" : "none"}
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                    </svg>
                   </button>
                   <button
                     type="button"

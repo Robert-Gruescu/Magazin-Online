@@ -5,6 +5,7 @@ import Product from "./pages/Product";
 import Category from "./pages/Category";
 import Register from "./pages/Register";
 import Cart from "./pages/Cart";
+import Favorites from "./pages/Favorites";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
       <Route path="/produs/:id" element={<Product />} />
       <Route path="/register" element={<Register />} />
       <Route path="/cart" element={<Cart />} />
+      <Route path="/favorite" element={<Favorites />} />
     </Routes>
   );
 }
