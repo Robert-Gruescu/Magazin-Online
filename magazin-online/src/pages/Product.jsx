@@ -30,7 +30,7 @@ const Product = () => {
 
       const { data, error: fetchError } = await supabase
         .from("products")
-        .select("id, name, description, price, image_url, fara_zahar, bio")
+        .select("id, name, description, price, image_url, fara_zahar, bio, stock")
         .eq("id", id)
         .single();
 
@@ -171,8 +171,18 @@ const Product = () => {
                     </span>
                     <button
                       type="button"
-                      onClick={() => setQuantity((q) => q + 1)}
-                      className="flex h-6 w-6 items-center justify-center rounded-full text-ink/50 transition hover:bg-ink/5 hover:text-ink"
+                      onClick={() =>
+                        setQuantity((q) =>
+                          typeof product.stock === "number"
+                            ? Math.min(q + 1, Math.max(1, product.stock))
+                            : q + 1,
+                        )
+                      }
+                      disabled={
+                        typeof product.stock === "number" &&
+                        quantity >= product.stock
+                      }
+                      className="flex h-6 w-6 items-center justify-center rounded-full text-ink/50 transition hover:bg-ink/5 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
                       aria-label="Crește cantitatea"
                     >
                       <svg
@@ -201,12 +211,26 @@ const Product = () => {
                   </div>
                 )}
 
+                {/* Stoc */}
+                {typeof product.stock === "number" && (
+                  <p className="mt-4 text-xs text-ink/45">
+                    {product.stock <= 0
+                      ? "Stoc epuizat"
+                      : product.stock <= 10
+                        ? `Doar ${product.stock} în stoc`
+                        : "În stoc"}
+                  </p>
+                )}
+
                 {/* Butoane */}
                 <div className="mt-5 flex flex-col gap-3">
                   <button
                     type="button"
                     onClick={() => addItem(product, quantity)}
-                    className="flex items-center justify-center gap-2 w-full rounded-full border py-3 transition border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+                    disabled={
+                      typeof product.stock === "number" && product.stock <= 0
+                    }
+                    className="flex items-center justify-center gap-2 w-full rounded-full border py-3 transition border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:border-ink/10 disabled:bg-ink/5 disabled:text-ink/30"
                   >
                     <svg
                       className="h-5 w-5"
@@ -219,7 +243,9 @@ const Product = () => {
                       <circle cx="17" cy="20" r="1" />
                       <path d="M3 4h2l2.5 11h11l2-7H7.2" />
                     </svg>
-                    Adaugă în coș
+                    {typeof product.stock === "number" && product.stock <= 0
+                      ? "Stoc epuizat"
+                      : "Adaugă în coș"}
                   </button>
                   <button
                     type="button"

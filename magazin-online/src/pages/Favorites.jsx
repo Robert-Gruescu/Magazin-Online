@@ -102,12 +102,13 @@ function Favorites() {
 
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-2">
-                      <h3
-                        className="cursor-pointer font-display text-lg text-ink hover:underline"
+                      <button
+                        type="button"
+                        className="cursor-pointer text-left font-display text-lg text-ink hover:underline"
                         onClick={() => navigate(`/produs/${product.id}`)}
                       >
                         {product.name}
-                      </h3>
+                      </button>
                       {/* Buton sterge din favorite */}
                       <button
                         type="button"

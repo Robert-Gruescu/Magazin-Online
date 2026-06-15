@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+/* Tailwind v4 încarcă tema din CSS (nu din tailwind.config.js).
+   Aici definim tokenii folosiți peste tot: ink, font-display, shadow-soft. */
+@theme {
+  --color-ink: #1f1b17;
+  --font-display: Georgia, serif;
+  --shadow-soft: 0 2px 16px 0 rgba(0, 0, 0, 0.06);
+}

@@ -260,27 +260,24 @@ function Register() {
             </div>
 
             <div className="rounded-3xl border border-white/60 bg-white/75 p-6 shadow-soft backdrop-blur">
-              <h2 className="font-display text-2xl text-ink">Tip cont</h2>
+              <h2 className="font-display text-2xl text-ink">Cum funcționează</h2>
               <div className="mt-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-ink/65">
-                    Înregistrat din aplicație
-                  </span>
+                  <span className="text-sm text-ink/65">Tip cont</span>
                   <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
                     Client
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-ink/65">
-                    Creat din Supabase
-                  </span>
+                  <span className="text-sm text-ink/65">Confirmare email</span>
                   <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-                    Admin
+                    Necesară
                   </span>
                 </div>
               </div>
               <p className="mt-4 text-xs text-ink/40">
-                Rolul se atribuie automat la creare.
+                Contul este creat prin Supabase Auth. După înregistrare
+                primești un email de confirmare.
               </p>
             </div>
           </div>

@@ -7,6 +7,9 @@ import Register from "./pages/Register";
 import Cart from "./pages/Cart";
 import Favorites from "./pages/Favorites";
 import WeeklyDeals from "./pages/WeeklyDeals";
+import Checkout from "./pages/Checkout";
+import Login from "./pages/Login";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -18,6 +21,9 @@ function App() {
       <Route path="/cart" element={<Cart />} />
       <Route path="/favorite" element={<Favorites />} />
       <Route path="/reduceri" element={<WeeklyDeals />} />
+      <Route path="/checkout" element={<Checkout />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

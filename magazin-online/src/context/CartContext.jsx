@@ -16,12 +16,22 @@ export function CartProvider({ children }) {
     localStorage.setItem("cart", JSON.stringify(items));
   }, [items]);
 
+  // Plafonează la stoc dacă acesta este cunoscut (numeric)
+  const capToStock = (quantity, stock) => {
+    if (typeof stock === "number" && Number.isFinite(stock)) {
+      return Math.max(1, Math.min(quantity, stock));
+    }
+    return Math.max(1, quantity);
+  };
+
   const addItem = (product, quantity = 1) => {
     setItems((prev) => {
       const existing = prev.find((i) => i.id === product.id);
       if (existing) {
         return prev.map((i) =>
-          i.id === product.id ? { ...i, quantity: i.quantity + quantity } : i,
+          i.id === product.id
+            ? { ...i, quantity: capToStock(i.quantity + quantity, i.stock) }
+            : i,
         );
       }
       return [
@@ -31,7 +41,8 @@ export function CartProvider({ children }) {
           name: product.name,
           price: product.price,
           image_url: product.image_url,
-          quantity,
+          stock: product.stock ?? null,
+          quantity: capToStock(quantity, product.stock),
         },
       ];
     });
@@ -46,7 +57,11 @@ export function CartProvider({ children }) {
       removeItem(id);
       return;
     }
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, quantity } : i)));
+    setItems((prev) =>
+      prev.map((i) =>
+        i.id === id ? { ...i, quantity: capToStock(quantity, i.stock) } : i,
+      ),
+    );
   };
 
   const clearCart = () => setItems([]);

@@ -131,7 +131,11 @@ function Cart() {
                         onClick={() =>
                           updateQuantity(item.id, item.quantity + 1)
                         }
-                        className="flex h-6 w-6 items-center justify-center rounded-full text-ink/40 transition hover:bg-ink/5 hover:text-ink"
+                        disabled={
+                          typeof item.stock === "number" &&
+                          item.quantity >= item.stock
+                        }
+                        className="flex h-6 w-6 items-center justify-center rounded-full text-ink/40 transition hover:bg-ink/5 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
                         aria-label="Crește cantitatea"
                       >
                         <svg
