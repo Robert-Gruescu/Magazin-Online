@@ -287,6 +287,25 @@ const Navbar = ({ selectedCategory, onCategoryClick }) => {
               </button>
             ))}
           </div>
+
+          {/* Reducerile săptămânii */}
+          <Link
+            to="/reduceri"
+            className="ml-auto flex items-center gap-1.5 rounded-full bg-rose-500 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-rose-600"
+          >
+            <svg
+              className="h-3.5 w-3.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
+              <line x1="7" y1="7" x2="7.01" y2="7" />
+            </svg>
+            Reduceri
+          </Link>
         </div>
       </div>
 
@@ -319,6 +338,24 @@ const Navbar = ({ selectedCategory, onCategoryClick }) => {
                 {cat.label}
               </button>
             ))}
+            <Link
+              to="/reduceri"
+              onClick={() => setIsOpen(false)}
+              className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-rose-500 px-3 py-2.5 text-sm font-semibold text-white"
+            >
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
+                <line x1="7" y1="7" x2="7.01" y2="7" />
+              </svg>
+              Reducerile săptămânii
+            </Link>
             <div className="mt-3 flex gap-2 border-t border-gray-100 pt-3">
               <Link
                 to="/register"

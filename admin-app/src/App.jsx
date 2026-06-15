@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import AddProduct from "./pages/AddProduct";
 import Orders from "./pages/Orders";
+import WeeklyDeals from "./pages/WeeklyDeals";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/products/new" element={<AddProduct />} />
               <Route path="/orders" element={<Orders />} />
+              <Route path="/deals" element={<WeeklyDeals />} />
             </Routes>
           </ProtectedRoute>
         }
