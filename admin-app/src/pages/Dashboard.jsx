@@ -75,7 +75,7 @@ function Dashboard() {
         Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
       ).toISOString();
 
-      const [totalRes, todayRes, faraZaharRes, bioRes, recentRes] =
+      const [totalRes, todayRes, outOfStockRes, ordersRes, recentRes] =
         await Promise.all([
           supabase
             .from("products")
@@ -87,11 +87,12 @@ function Dashboard() {
           supabase
             .from("products")
             .select("id", { count: "exact", head: true })
-            .eq("fara_zahar", true),
+            .lte("stock", 0),
+          // Comenzile inca neprocesate. Daca tabelul nu exista, ignoram.
           supabase
-            .from("products")
+            .from("orders")
             .select("id", { count: "exact", head: true })
-            .eq("bio", true),
+            .eq("status", "noua"),
           supabase
             .from("products")
             .select("id, name, price, created_at")
@@ -101,22 +102,16 @@ function Dashboard() {
 
       if (!active) return;
 
-      if (
-        totalRes.error ||
-        todayRes.error ||
-        faraZaharRes.error ||
-        bioRes.error ||
-        recentRes.error
-      ) {
+      if (totalRes.error || todayRes.error || recentRes.error) {
         setDataState("error");
         return;
       }
 
       setMetrics([
         { label: "Total produse", value: totalRes.count ?? 0 },
-        { label: "Produse adaugate azi", value: todayRes.count ?? 0 },
-        { label: "Fara zahar", value: faraZaharRes.count ?? 0 },
-        { label: "Bio", value: bioRes.count ?? 0 },
+        { label: "Adaugate azi", value: todayRes.count ?? 0 },
+        { label: "Stoc epuizat", value: outOfStockRes.error ? "-" : outOfStockRes.count ?? 0 },
+        { label: "Comenzi noi", value: ordersRes.error ? "-" : ordersRes.count ?? 0 },
       ]);
       setRecentProducts(recentRes.data ?? []);
       setDataState("ready");
@@ -188,6 +183,18 @@ function Dashboard() {
             <span className="rounded-full border border-ink/10 bg-white/70 px-3 py-1 text-xs uppercase tracking-[0.2em] text-ink/70">
               Live
             </span>
+            <Link
+              to="/products"
+              className="rounded-full border border-ink/10 bg-white/70 px-5 py-2 text-sm font-semibold text-ink/70 transition hover:bg-white"
+            >
+              Catalog
+            </Link>
+            <Link
+              to="/orders"
+              className="rounded-full border border-ink/10 bg-white/70 px-5 py-2 text-sm font-semibold text-ink/70 transition hover:bg-white"
+            >
+              Comenzi
+            </Link>
             <Link
               to="/deals"
               className="rounded-full border border-rose-200 bg-rose-50 px-5 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100"

@@ -1,9 +1,25 @@
 @import "tailwindcss";
 
 /* Tailwind v4 încarcă tema din CSS (nu din tailwind.config.js).
-   Aici definim tokenii folosiți peste tot: ink, font-display, shadow-soft. */
+   Paletă VoltMag: bază rece (grafit/albastru), accent electric. */
 @theme {
-  --color-ink: #1f1b17;
-  --font-display: Georgia, serif;
-  --shadow-soft: 0 2px 16px 0 rgba(0, 0, 0, 0.06);
+  --color-ink: #0b1220;
+  --color-volt: #2563eb;
+  --color-volt-dark: #1d4ed8;
+  --color-volt-soft: #dbeafe;
+  --color-cyan-glow: #06b6d4;
+
+  --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
+
+  --shadow-soft: 0 2px 16px 0 rgba(11, 18, 32, 0.06);
+  --shadow-lift: 0 18px 40px -18px rgba(11, 18, 32, 0.35);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #f8fafc;
 }

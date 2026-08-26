@@ -1,0 +1,48 @@
+# ============================================================================
+# .gitignore la nivel de proiect (acopera ambele aplicatii)
+# Fiecare aplicatie are si propriul .gitignore pentru node_modules si dist.
+# ============================================================================
+
+# Documentatie generata local (Word / PDF)
+Documentatie-VoltMag.docx
+*.docx
+*.pdf
+
+# Scripturi SQL rulate manual in Supabase (migrari, seed)
+*.sql
+sql/
+
+# Fisiere temporare Word/Office (blocaje si autosave)
+~$*
+*.tmp
+
+# Variabile de mediu — NU trebuie sa ajunga niciodata in git
+.env
+.env.*
+!.env.example
+
+# Dependinte si build-uri
+node_modules/
+dist/
+dist-ssr/
+.vite/
+
+# Vercel
+.vercel
+
+# Loguri
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Editor si sistem de operare
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.sw?
+.env*

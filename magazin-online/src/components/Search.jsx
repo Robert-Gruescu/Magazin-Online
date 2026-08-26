@@ -1,60 +1,51 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import Icon from "./Icon";
 
 const Search = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [query, setQuery] = useState("");
+  const urlQuery = new URLSearchParams(location.search).get("q") || "";
+  const [query, setQuery] = useState(urlQuery);
 
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    setQuery(params.get("q") || "");
-  }, [location.search]);
+  // Când se schimbă ?q= din URL (navigare, back/forward), resincronizăm inputul.
+  const [lastUrlQuery, setLastUrlQuery] = useState(urlQuery);
+  if (lastUrlQuery !== urlQuery) {
+    setLastUrlQuery(urlQuery);
+    setQuery(urlQuery);
+  }
 
   const handleSubmit = (event) => {
     event.preventDefault();
     const trimmed = query.trim();
-    const params = new URLSearchParams(location.search);
-
-    if (trimmed) {
-      params.set("q", trimmed);
-    } else {
-      params.delete("q");
-    }
+    // Căutarea duce mereu în catalog, nu pe landing page.
+    const params = new URLSearchParams();
+    if (trimmed) params.set("q", trimmed);
 
     navigate({
-      pathname: "/",
+      pathname: "/produse",
       search: params.toString() ? `?${params.toString()}` : "",
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative w-full max-w-2xl">
+    <form onSubmit={handleSubmit} className="relative w-full">
+      <Icon
+        name="search"
+        className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+      />
       <input
         type="search"
-        placeholder="Incepe o noua cautare"
+        placeholder="Caută laptop, telefon, placă video…"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        className="w-full rounded-full border border-ink/10 bg-white px-4 py-2 pr-12 text-sm text-ink placeholder:text-ink/40 focus:outline-none focus:ring-2 focus:ring-ink/30"
+        className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-24 text-sm text-ink placeholder:text-slate-400 focus:border-volt focus:bg-white focus:outline-none focus:ring-2 focus:ring-volt/20"
       />
       <button
         type="submit"
-        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-2 text-ink/60 hover:bg-ink/5 hover:text-ink"
-        aria-label="Caută"
+        className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-lg bg-ink px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-volt"
       >
-        <svg
-          className="h-5 w-5"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <circle cx="11" cy="11" r="8" />
-          <path d="M21 21l-4.3-4.3" />
-        </svg>
+        Caută
       </button>
     </form>
   );

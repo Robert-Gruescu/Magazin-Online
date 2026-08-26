@@ -18,4 +18,15 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    // Funcțiile serverless rulează în Node, nu în browser.
+    files: ['api/**/*.js'],
+    languageOptions: { globals: globals.node },
+  },
+  {
+    // Providerele exportă și hook-ul aferent (useCart, useAuth…), tipar uzual
+    // pentru Context API. Fast refresh nu e o problemă aici.
+    files: ['src/context/**/*.jsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
 ])

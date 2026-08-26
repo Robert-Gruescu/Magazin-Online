@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { isSupabaseConfigured, supabase } from "../supabaseClient";
+import ImageManager from "../components/ImageManager";
+import { uploadProductImage, validateImage } from "../services/productImages";
 
 const initialForm = {
   categoryId: "",
@@ -9,8 +11,12 @@ const initialForm = {
   price: "",
   stock: "",
   imageUrl: "",
-  faraZahar: false,
-  bio: false,
+  brand: "",
+  sku: "",
+  pretVechi: "",
+  garantieLuni: "24",
+  rating: "",
+  specs: [{ key: "", value: "" }],
 };
 
 function AddProduct() {
@@ -19,6 +25,9 @@ function AddProduct() {
   const [categoriesState, setCategoriesState] = useState("idle");
   const [submitState, setSubmitState] = useState("idle");
   const [submitMessage, setSubmitMessage] = useState("");
+  // Imaginile alese inainte de salvare; se urca dupa ce produsul primeste un id.
+  const [pendingFiles, setPendingFiles] = useState([]);
+  const [createdProductId, setCreatedProductId] = useState(null);
 
   const supabaseReady = Boolean(isSupabaseConfigured && supabase);
 
@@ -76,6 +85,47 @@ function AddProduct() {
     }));
   };
 
+  const handlePickFiles = (event) => {
+    const picked = Array.from(event.target.files || []);
+    const problems = picked.map(validateImage).filter(Boolean);
+
+    if (problems.length > 0) {
+      setSubmitState("error");
+      setSubmitMessage(problems.join(" "));
+    }
+
+    setPendingFiles((prev) => [
+      ...prev,
+      ...picked.filter((file) => !validateImage(file)),
+    ]);
+    event.target.value = "";
+  };
+
+  const removePendingFile = (index) =>
+    setPendingFiles((prev) => prev.filter((_, i) => i !== index));
+
+  const handleSpecChange = (index, field) => (event) => {
+    const { value } = event.target;
+    setFormValues((prev) => ({
+      ...prev,
+      specs: prev.specs.map((row, i) =>
+        i === index ? { ...row, [field]: value } : row,
+      ),
+    }));
+  };
+
+  const addSpecRow = () =>
+    setFormValues((prev) => ({
+      ...prev,
+      specs: [...prev.specs, { key: "", value: "" }],
+    }));
+
+  const removeSpecRow = (index) =>
+    setFormValues((prev) => {
+      const specs = prev.specs.filter((_, i) => i !== index);
+      return { ...prev, specs: specs.length ? specs : [{ key: "", value: "" }] };
+    });
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setSubmitMessage("");
@@ -90,6 +140,17 @@ function AddProduct() {
     const priceValue = Number.parseFloat(formValues.price);
     const stockValue = Number.parseInt(formValues.stock, 10);
     const categoryId = Number.parseInt(formValues.categoryId, 10);
+    const oldPriceValue = Number.parseFloat(formValues.pretVechi);
+    const warrantyValue = Number.parseInt(formValues.garantieLuni, 10);
+    const ratingValue = Number.parseFloat(formValues.rating);
+
+    // Perechile cheie/valoare completate devin obiectul JSONB `specificatii`.
+    const specsObject = formValues.specs.reduce((acc, row) => {
+      const key = row.key.trim();
+      const value = row.value.trim();
+      if (key && value) acc[key] = value;
+      return acc;
+    }, {});
 
     if (!formValues.categoryId) {
       setSubmitState("error");
@@ -109,6 +170,15 @@ function AddProduct() {
       return;
     }
 
+    if (
+      formValues.rating &&
+      (!Number.isFinite(ratingValue) || ratingValue < 0 || ratingValue > 5)
+    ) {
+      setSubmitState("error");
+      setSubmitMessage("Rating-ul trebuie sa fie intre 0 si 5.");
+      return;
+    }
+
     setSubmitState("submitting");
 
     const payload = {
@@ -118,11 +188,21 @@ function AddProduct() {
       price: Number(priceValue.toFixed(2)),
       stock: Number.isFinite(stockValue) ? stockValue : 0,
       image_url: formValues.imageUrl.trim() || null,
-      fara_zahar: formValues.faraZahar,
-      bio: formValues.bio,
+      brand: formValues.brand.trim() || null,
+      sku: formValues.sku.trim() || null,
+      pret_vechi: Number.isFinite(oldPriceValue)
+        ? Number(oldPriceValue.toFixed(2))
+        : null,
+      garantie_luni: Number.isFinite(warrantyValue) ? warrantyValue : null,
+      rating: Number.isFinite(ratingValue) ? ratingValue : null,
+      specificatii: specsObject,
     };
 
-    const { error } = await supabase.from("products").insert(payload);
+    const { data: created, error } = await supabase
+      .from("products")
+      .insert(payload)
+      .select("id")
+      .single();
 
     if (error) {
       setSubmitState("error");
@@ -130,16 +210,33 @@ function AddProduct() {
       return;
     }
 
-    setSubmitState("success");
-    setSubmitMessage("Produsul a fost salvat cu succes.");
+    // Imaginile se urca abia acum: aveam nevoie de id-ul produsului pentru
+    // calea din bucket si pentru randurile din product_images.
+    const uploadProblems = [];
+    for (const file of pendingFiles) {
+      const { error: uploadError } = await uploadProductImage(created.id, file);
+      if (uploadError) uploadProblems.push(uploadError);
+    }
+
+    setCreatedProductId(created.id);
+    setPendingFiles([]);
+    setSubmitState(uploadProblems.length > 0 ? "error" : "success");
+    setSubmitMessage(
+      uploadProblems.length > 0
+        ? `Produsul a fost salvat, dar unele imagini nu au putut fi urcate: ${uploadProblems.join(" ")}`
+        : "Produsul a fost salvat cu succes.",
+    );
     setFormValues((prev) => ({
       ...initialForm,
+      specs: [{ key: "", value: "" }],
       categoryId: prev.categoryId,
     }));
   };
 
   const handleReset = () => {
-    setFormValues(initialForm);
+    setFormValues({ ...initialForm, specs: [{ key: "", value: "" }] });
+    setPendingFiles([]);
+    setCreatedProductId(null);
     setSubmitState("idle");
     setSubmitMessage("");
   };
@@ -216,7 +313,7 @@ function AddProduct() {
                   type="text"
                   value={formValues.name}
                   onChange={handleChange("name")}
-                  placeholder="Ex: Biscuiti vegani"
+                  placeholder="Ex: ASUS ROG Strix G16"
                   className="rounded-2xl border border-ink/10 bg-white/90 px-4 py-3 text-sm"
                 />
               </label>
@@ -278,40 +375,178 @@ function AddProduct() {
                 />
               </label>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="flex items-start gap-3 rounded-2xl border border-ink/10 bg-white/80 p-4">
-                  <input
-                    type="checkbox"
-                    checked={formValues.faraZahar}
-                    onChange={handleChange("faraZahar")}
-                    className="mt-1 h-4 w-4"
-                  />
-                  <span>
-                    <span className="block text-sm font-semibold text-ink">
-                      Fara zahar
-                    </span>
-                    <span className="block text-xs text-ink/60">
-                      Marcheaza produsele potrivite pentru diabetici.
-                    </span>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="grid gap-2">
+                  <span className="text-xs uppercase tracking-[0.2em] text-ink/50">
+                    Brand
                   </span>
+                  <input
+                    type="text"
+                    value={formValues.brand}
+                    onChange={handleChange("brand")}
+                    placeholder="Ex: ASUS"
+                    className="rounded-2xl border border-ink/10 bg-white/90 px-4 py-3 text-sm"
+                  />
                 </label>
 
-                <label className="flex items-start gap-3 rounded-2xl border border-ink/10 bg-white/80 p-4">
-                  <input
-                    type="checkbox"
-                    checked={formValues.bio}
-                    onChange={handleChange("bio")}
-                    className="mt-1 h-4 w-4"
-                  />
-                  <span>
-                    <span className="block text-sm font-semibold text-ink">
-                      Bio
-                    </span>
-                    <span className="block text-xs text-ink/60">
-                      Evidentiaza produsele din ingrediente organice.
-                    </span>
+                <label className="grid gap-2">
+                  <span className="text-xs uppercase tracking-[0.2em] text-ink/50">
+                    Cod produs (SKU)
                   </span>
+                  <input
+                    type="text"
+                    value={formValues.sku}
+                    onChange={handleChange("sku")}
+                    placeholder="ASU-ROG-G16"
+                    className="rounded-2xl border border-ink/10 bg-white/90 px-4 py-3 text-sm"
+                  />
                 </label>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <label className="grid gap-2">
+                  <span className="text-xs uppercase tracking-[0.2em] text-ink/50">
+                    Pret vechi (lei)
+                  </span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formValues.pretVechi}
+                    onChange={handleChange("pretVechi")}
+                    placeholder="Optional"
+                    className="rounded-2xl border border-ink/10 bg-white/90 px-4 py-3 text-sm"
+                  />
+                </label>
+
+                <label className="grid gap-2">
+                  <span className="text-xs uppercase tracking-[0.2em] text-ink/50">
+                    Garantie (luni)
+                  </span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formValues.garantieLuni}
+                    onChange={handleChange("garantieLuni")}
+                    placeholder="24"
+                    className="rounded-2xl border border-ink/10 bg-white/90 px-4 py-3 text-sm"
+                  />
+                </label>
+
+                <label className="grid gap-2">
+                  <span className="text-xs uppercase tracking-[0.2em] text-ink/50">
+                    Rating (0-5)
+                  </span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="5"
+                    step="0.1"
+                    value={formValues.rating}
+                    onChange={handleChange("rating")}
+                    placeholder="4.7"
+                    className="rounded-2xl border border-ink/10 bg-white/90 px-4 py-3 text-sm"
+                  />
+                </label>
+              </div>
+
+              {/* Specificatii tehnice -> coloana JSONB `specificatii` */}
+              <div className="rounded-2xl border border-ink/10 bg-white/80 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs uppercase tracking-[0.2em] text-ink/50">
+                    Specificatii tehnice
+                  </span>
+                  <button
+                    type="button"
+                    onClick={addSpecRow}
+                    className="rounded-full border border-ink/10 bg-white px-3 py-1 text-xs font-semibold text-ink/70"
+                  >
+                    + Adauga rand
+                  </button>
+                </div>
+
+                <div className="mt-3 grid gap-2">
+                  {formValues.specs.map((row, index) => (
+                    <div key={index} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={row.key}
+                        onChange={handleSpecChange(index, "key")}
+                        placeholder="Procesor"
+                        className="w-2/5 rounded-xl border border-ink/10 bg-white px-3 py-2 text-sm"
+                      />
+                      <input
+                        type="text"
+                        value={row.value}
+                        onChange={handleSpecChange(index, "value")}
+                        placeholder="Intel Core i7-13650HX"
+                        className="flex-1 rounded-xl border border-ink/10 bg-white px-3 py-2 text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeSpecRow(index)}
+                        className="rounded-xl border border-ink/10 bg-white px-3 text-sm text-ink/40 hover:text-rose-500"
+                        aria-label="Sterge randul"
+                      >
+                        x
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Imagini */}
+              <div className="rounded-2xl border border-ink/10 bg-white/80 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-xs uppercase tracking-[0.2em] text-ink/50">
+                    Imagini produs
+                  </span>
+                  <label className="cursor-pointer rounded-full border border-ink/10 bg-white px-3 py-1 text-xs font-semibold text-ink/70">
+                    + Alege imagini
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/avif"
+                      multiple
+                      className="hidden"
+                      onChange={handlePickFiles}
+                    />
+                  </label>
+                </div>
+
+                {pendingFiles.length === 0 ? (
+                  <p className="mt-3 text-xs text-ink/45">
+                    Optional. Imaginile se urca automat dupa ce salvezi produsul.
+                    Prima devine imaginea principala.
+                  </p>
+                ) : (
+                  <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                    {pendingFiles.map((file, index) => (
+                      <figure
+                        key={`${file.name}-${index}`}
+                        className="relative overflow-hidden rounded-xl border border-ink/10 bg-ink/5"
+                      >
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt=""
+                          className="aspect-square w-full object-contain p-1"
+                        />
+                        {index === 0 && (
+                          <span className="absolute left-1 top-1 rounded bg-ink px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">
+                            Principala
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removePendingFile(index)}
+                          className="absolute right-1 top-1 rounded bg-white/90 px-1.5 py-0.5 text-[10px] font-bold text-rose-600"
+                          aria-label={`Scoate ${file.name}`}
+                        >
+                          x
+                        </button>
+                      </figure>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {submitMessage ? (
@@ -348,6 +583,20 @@ function AddProduct() {
           </form>
 
           <div className="space-y-6">
+            {createdProductId && (
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50/70 p-6 shadow-soft">
+                <h2 className="font-display text-2xl text-ink">
+                  Galeria produsului salvat
+                </h2>
+                <p className="mt-1 text-sm text-ink/60">
+                  Poti adauga sau reordona imaginile chiar acum.
+                </p>
+                <div className="mt-4">
+                  <ImageManager productId={createdProductId} compact />
+                </div>
+              </div>
+            )}
+
             <div className="rounded-3xl border border-white/60 bg-white/80 p-6 shadow-soft backdrop-blur">
               <h2 className="font-display text-2xl text-ink">
                 Chei importante
@@ -355,7 +604,9 @@ function AddProduct() {
               <ul className="mt-4 space-y-3 text-sm text-ink/70">
                 <li>category_id este obligatoriu si provine din categories.</li>
                 <li>created_at se seteaza automat la salvare.</li>
-                <li>fara_zahar si bio sunt valori boolean.</li>
+                <li>brand si sku ajuta filtrarea si cautarea in catalog.</li>
+                <li>specificatii se salveaza ca JSONB si apare pe pagina de produs.</li>
+                <li>pret_vechi activeaza badge-ul de reducere pe card.</li>
                 <li>image_url este optional si poate ramane gol.</li>
                 <li>stock reprezinta cantitatea disponibila in depozit.</li>
               </ul>

@@ -1,238 +1,224 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import { Link } from "react-router-dom";
+import Layout from "../components/Layout";
+import Icon from "../components/Icon";
 import { useCart } from "../context/CartContext";
+import { formatPrice } from "../lib/format";
+import { FREE_SHIPPING_THRESHOLD, shippingFor } from "../services/orders";
 
-function Cart() {
-  const { items, removeItem, updateQuantity, totalPrice } = useCart();
-  const navigate = useNavigate();
+const Cart = () => {
+  const { items, removeItem, updateQuantity, totalPrice, totalItems } = useCart();
+
+  const shipping = shippingFor(totalPrice);
+  const remaining = FREE_SHIPPING_THRESHOLD - totalPrice;
+
+  if (items.length === 0) {
+    return (
+      <Layout>
+        <div className="py-24 text-center">
+          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-white">
+            <Icon name="cart" className="h-7 w-7 text-slate-300" />
+          </span>
+          <h1 className="mt-6 font-display text-2xl font-bold text-ink">
+            Coșul tău este gol
+          </h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Adaugă produse din catalog ca să continui.
+          </p>
+          <Link
+            to="/produse"
+            className="mt-6 inline-block rounded-xl bg-ink px-6 py-3 text-sm font-semibold text-white transition hover:bg-volt"
+          >
+            Vezi produsele
+          </Link>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
-    <div className="relative min-h-screen overflow-hidden font-sans">
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to right, #f4e8e1 0%, #f7f5f2 52%, #eef2f5 100%)",
-        }}
-      />
-      <div className="absolute left-37.5 top-25 h-125 w-125 rounded-full bg-[#f0d8cb] opacity-25 blur-[120px]" />
-      <div className="absolute right-37.5 top-25 h-125 w-125 rounded-full bg-[#dfe7ee] opacity-25 blur-[120px]" />
+    <Layout>
+      <header className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-volt">
+            Pasul 1 din 2
+          </p>
+          <h1 className="mt-2 font-display text-3xl font-bold text-ink sm:text-4xl">
+            Coșul tău
+          </h1>
+          <p className="mt-2 text-sm text-slate-500">
+            {totalItems} {totalItems === 1 ? "produs" : "produse"} în coș
+          </p>
+        </div>
+        <Link
+          to="/produse"
+          className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:text-ink"
+        >
+          Continuă cumpărăturile
+        </Link>
+      </header>
 
-      <div className="relative z-10">
-        <Navbar />
+      <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_360px]">
+        {/* Lista */}
+        <div className="space-y-3">
+          {items.map((item) => {
+            const maxed =
+              typeof item.stock === "number" && item.quantity >= item.stock;
 
-        <div className="mx-auto max-w-5xl px-6 py-10">
-          <header className="flex flex-wrap items-center justify-between gap-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-ink/40">
-                Cumpărături
-              </p>
-              <h1 className="mt-2 font-display text-3xl text-ink sm:text-4xl">
-                Coșul tău
-              </h1>
-              <p className="mt-2 text-sm text-ink/55">
-                {items.length === 0
-                  ? "Coșul este gol."
-                  : `${items.length} ${items.length === 1 ? "produs" : "produse"} în coș`}
-              </p>
-            </div>
-            <Link
-              to="/"
-              className="rounded-full border border-ink/10 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-ink/60 transition hover:bg-white"
-            >
-              Continuă cumpărăturile
-            </Link>
-          </header>
-
-          {items.length === 0 ? (
-            <div className="mt-20 text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/70 border border-ink/8">
-                <svg
-                  className="h-7 w-7 text-ink/30"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  viewBox="0 0 24 24"
-                >
-                  <circle cx="9" cy="20" r="1" />
-                  <circle cx="17" cy="20" r="1" />
-                  <path d="M3 4h2l2.5 11h11l2-7H7.2" />
-                </svg>
-              </div>
-              <p className="text-sm text-ink/40">Nu ai niciun produs în coș.</p>
-              <button
-                type="button"
-                onClick={() => navigate("/")}
-                className="mt-4 rounded-full bg-ink px-6 py-2 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5"
+            return (
+              <div
+                key={item.id}
+                className="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-soft"
               >
-                Vezi produsele
-              </button>
-            </div>
-          ) : (
-            <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_0.4fr]">
-              {/* Lista produse */}
-              <div className="space-y-3">
-                {items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center gap-4 rounded-3xl border border-white/60 bg-white/85 p-4 shadow-soft backdrop-blur"
+                <Link
+                  to={`/produs/${item.id}`}
+                  className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50"
+                >
+                  {item.image_url ? (
+                    <img
+                      src={item.image_url}
+                      alt={item.name}
+                      className="h-full w-full object-contain p-2"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-xs text-slate-300">
+                      —
+                    </div>
+                  )}
+                </Link>
+
+                <div className="min-w-0 flex-1">
+                  {item.brand && (
+                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-volt">
+                      {item.brand}
+                    </span>
+                  )}
+                  <Link
+                    to={`/produs/${item.id}`}
+                    className="block truncate font-display text-sm font-semibold text-ink transition hover:text-volt"
                   >
-                    {/* Imagine */}
-                    <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl bg-ink/5">
-                      {item.image_url ? (
-                        <img
-                          src={item.image_url}
-                          alt={item.name}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs text-ink/30">
-                          —
-                        </div>
-                      )}
-                    </div>
+                    {item.name}
+                  </Link>
+                  <p className="mt-0.5 text-xs text-slate-400">
+                    {formatPrice(item.price)} / buc
+                  </p>
+                  {maxed && (
+                    <p className="mt-1 text-[11px] text-amber-600">
+                      Ai atins stocul disponibil.
+                    </p>
+                  )}
+                </div>
 
-                    {/* Info */}
-                    <div className="min-w-0 flex-1">
-                      <p className="font-display text-base text-ink">
-                        {item.name}
-                      </p>
-                      <p className="mt-0.5 text-xs text-ink/50">
-                        {Number(item.price).toFixed(2)} lei / buc
-                      </p>
-                    </div>
-
-                    {/* Cantitate */}
-                    <div className="flex items-center gap-2 rounded-2xl border border-ink/10 bg-white/90 px-3 py-1.5">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity - 1)
-                        }
-                        className="flex h-6 w-6 items-center justify-center rounded-full text-ink/40 transition hover:bg-ink/5 hover:text-ink"
-                        aria-label="Scade cantitatea"
-                      >
-                        <svg
-                          className="h-3.5 w-3.5"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          viewBox="0 0 24 24"
-                        >
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                        </svg>
-                      </button>
-                      <span className="w-6 text-center text-sm font-semibold text-ink">
-                        {item.quantity}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity + 1)
-                        }
-                        disabled={
-                          typeof item.stock === "number" &&
-                          item.quantity >= item.stock
-                        }
-                        className="flex h-6 w-6 items-center justify-center rounded-full text-ink/40 transition hover:bg-ink/5 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
-                        aria-label="Crește cantitatea"
-                      >
-                        <svg
-                          className="h-3.5 w-3.5"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          viewBox="0 0 24 24"
-                        >
-                          <line x1="12" y1="5" x2="12" y2="19" />
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    {/* Subtotal */}
-                    <div className="w-24 text-right">
-                      <p className="text-sm font-semibold text-ink">
-                        {(Number(item.price) * item.quantity).toFixed(2)} lei
-                      </p>
-                    </div>
-
-                    {/* Sterge */}
-                    <button
-                      type="button"
-                      onClick={() => removeItem(item.id)}
-                      className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl border border-ink/8 bg-white/70 text-ink/30 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500"
-                      aria-label="Șterge produsul"
-                    >
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        viewBox="0 0 24 24"
-                      >
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {/* Sumar */}
-              <div className="space-y-4">
-                <div className="rounded-3xl border border-white/60 bg-white/85 p-6 shadow-soft backdrop-blur">
-                  <h2 className="font-display text-xl text-ink">Sumar</h2>
-
-                  <div className="mt-4 space-y-2">
-                    {items.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex justify-between text-xs text-ink/55"
-                      >
-                        <span className="truncate pr-2">
-                          {item.name} × {item.quantity}
-                        </span>
-                        <span className="flex-shrink-0">
-                          {(Number(item.price) * item.quantity).toFixed(2)} lei
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-4 border-t border-ink/8 pt-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-ink/60">Total</span>
-                      <span className="font-display text-2xl text-ink">
-                        {totalPrice.toFixed(2)} lei
-                      </span>
-                    </div>
-                  </div>
-
+                <div className="flex items-center gap-1 rounded-xl border border-slate-200 p-1">
                   <button
                     type="button"
-                    onClick={() => navigate("/checkout")}
-                    className="mt-5 w-full rounded-full bg-ink py-3 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5"
+                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-50"
+                    aria-label="Scade cantitatea"
                   >
-                    Plasează comanda
+                    −
                   </button>
-
+                  <span className="w-8 text-center text-sm font-semibold text-ink">
+                    {item.quantity}
+                  </span>
                   <button
                     type="button"
-                    onClick={() => navigate("/")}
-                    className="mt-2 w-full rounded-full border border-ink/10 bg-white/70 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-ink/55 transition hover:bg-white"
+                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                    disabled={maxed}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-50 disabled:opacity-30"
+                    aria-label="Crește cantitatea"
                   >
-                    Continuă cumpărăturile
+                    +
                   </button>
                 </div>
+
+                <div className="w-28 text-right">
+                  <p className="font-display text-sm font-bold text-ink">
+                    {formatPrice(Number(item.price) * item.quantity)}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => removeItem(item.id)}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-300 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500"
+                  aria-label="Șterge produsul"
+                >
+                  <Icon name="close" className="h-4 w-4" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Sumar */}
+        <aside className="lg:sticky lg:top-40 lg:self-start">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-soft">
+            <h2 className="font-display text-lg font-bold text-ink">Sumar</h2>
+
+            <div className="mt-4 space-y-2 text-sm">
+              <div className="flex justify-between text-slate-500">
+                <span>Subtotal</span>
+                <span>{formatPrice(totalPrice)}</span>
+              </div>
+              <div className="flex justify-between text-slate-500">
+                <span>Livrare estimată</span>
+                <span className={shipping === 0 ? "text-emerald-600" : ""}>
+                  {shipping === 0 ? "Gratuit" : formatPrice(shipping)}
+                </span>
               </div>
             </div>
-          )}
-        </div>
+
+            {shipping > 0 && (
+              <div className="mt-4 rounded-xl bg-volt/5 p-3">
+                <p className="text-[11px] text-volt">
+                  Mai adaugă {formatPrice(remaining)} pentru livrare gratuită.
+                </p>
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-volt/15">
+                  <div
+                    className="h-full rounded-full bg-volt transition-all"
+                    style={{
+                      width: `${Math.min(100, (totalPrice / FREE_SHIPPING_THRESHOLD) * 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="mt-5 flex items-baseline justify-between border-t border-slate-100 pt-4">
+              <span className="text-sm text-slate-500">Total</span>
+              <span className="font-display text-2xl font-bold text-ink">
+                {formatPrice(totalPrice + shipping)}
+              </span>
+            </div>
+
+            <Link
+              to="/checkout"
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-3.5 text-sm font-semibold text-white transition hover:bg-volt"
+            >
+              Finalizează comanda
+              <Icon name="chevronRight" className="h-4 w-4" />
+            </Link>
+
+            <ul className="mt-5 space-y-2 border-t border-slate-100 pt-4">
+              {[
+                "Retur gratuit în 30 de zile",
+                "Factură și garanție incluse",
+                "Plata la livrare disponibilă",
+              ].map((line) => (
+                <li
+                  key={line}
+                  className="flex items-center gap-2 text-[11px] text-slate-500"
+                >
+                  <Icon name="check" className="h-3.5 w-3.5 text-emerald-500" />
+                  {line}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
       </div>
-    </div>
+    </Layout>
   );
-}
+};
 
 export default Cart;

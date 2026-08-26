@@ -1,384 +1,302 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import Search from "./Search";
+import Icon from "./Icon";
+import { CATEGORIES, SITE } from "../config/site";
+import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useFavorites } from "../context/FavoritesContext";
 
-const categories = [
-  { label: "Fructe", slug: "fructe" },
-  { label: "Legume", slug: "legume" },
-  { label: "Băuturi", slug: "bauturi" },
-  { label: "Congelate", slug: "congelate" },
-  { label: "Carne", slug: "carne" },
-];
-
-const Navbar = ({ selectedCategory, onCategoryClick }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isProductsOpen, setIsProductsOpen] = useState(false);
-  const productsMenuRef = useRef(null);
+const Navbar = () => {
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const accountRef = useRef(null);
   const location = useLocation();
-  const navigate = useNavigate();
-  const { items } = useCart();
-  const { favorites } = useFavorites();
 
-  const uniqueItems = items.length;
+  const { totalItems } = useCart();
+  const { favorites } = useFavorites();
+  const { user, signOut } = useAuth();
+
+  // Închide meniurile la schimbarea rutei. Ajustarea stării în timpul
+  // render-ului (nu într-un efect) evită un al doilea render inutil.
+  const [lastKey, setLastKey] = useState(location.key);
+  if (lastKey !== location.key) {
+    setLastKey(location.key);
+    setIsMobileOpen(false);
+    setIsAccountOpen(false);
+  }
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        productsMenuRef.current &&
-        !productsMenuRef.current.contains(event.target)
-      ) {
-        setIsProductsOpen(false);
+      if (accountRef.current && !accountRef.current.contains(event.target)) {
+        setIsAccountOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const currentCategorySlug = location.pathname.startsWith("/category/")
-    ? location.pathname.split("/")[2]
-    : "";
-
-  const isCategorySelected = (slug) =>
-    selectedCategory ? selectedCategory === slug : currentCategorySlug === slug;
-
-  const handleCategoryClick = (slug) => {
-    setIsProductsOpen(false);
-    if (onCategoryClick) {
-      onCategoryClick(slug);
-      return;
-    }
-    if (isCategorySelected(slug)) {
-      navigate("/");
-      return;
-    }
-    navigate(`/category/${slug}`);
-  };
+  const pillLink =
+    "flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-volt/40 hover:text-ink";
 
   return (
-    <nav className="border-b border-gray-200 bg-white/90 backdrop-blur sticky top-0 z-50 w-full">
-      {/* Bara principala */}
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-3">
-        {/* Brand + Search */}
-        <div className="flex items-center gap-4 min-w-0">
-          <Link
-            to="/"
-            className="shrink-0 font-bold text-xl text-black tracking-tight"
-          >
-            Magazin Online
-          </Link>
+    <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/90 backdrop-blur">
+      {/* Bara de anunț */}
+      <div className="bg-ink text-white">
+        <div className="mx-auto flex max-w-6xl items-center justify-center gap-2 px-6 py-1.5 text-[11px] font-medium tracking-wide">
+          <Icon name="truck" className="h-3.5 w-3.5 text-volt" />
+          Livrare gratuită la comenzi peste 500 lei · Retur în 30 de zile
+        </div>
+      </div>
+
+      {/* Bara principală */}
+      <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-3">
+        <Link to="/" className="flex shrink-0 items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ink text-white">
+            <Icon name="bolt" className="h-4 w-4" filled />
+          </span>
+          <span className="font-display text-xl font-bold tracking-tight text-ink">
+            {SITE.name}
+          </span>
+        </Link>
+
+        <div className="hidden min-w-0 flex-1 md:block">
           <Search />
         </div>
 
-        {/* Actiuni desktop */}
-        <div className="hidden md:flex items-center gap-3 shrink-0">
-          {/* Buton Favorite */}
-          <Link
-            to="/favorite"
-            className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-white/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-gray-700 transition hover:bg-gray-50"
-          >
-            <svg
-              className="h-3.5 w-3.5 text-gray-600"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-            </svg>
-            Favorite
+        {/* Acțiuni desktop */}
+        <div className="hidden shrink-0 items-center gap-2 md:flex">
+          <Link to="/favorite" className={pillLink}>
+            <Icon
+              name="heart"
+              className="h-4 w-4"
+              filled={favorites.length > 0}
+            />
+            <span className="hidden lg:inline">Favorite</span>
             {favorites.length > 0 && (
-              <span className="rounded-full bg-rose-100 px-1.5 py-0.5 text-xs font-semibold text-rose-600">
+              <span className="rounded-full bg-rose-100 px-1.5 text-[11px] font-bold text-rose-600">
                 {favorites.length}
               </span>
             )}
           </Link>
 
-          {/* Buton Cont */}
-          <Link
-            to="/register"
-            className="rounded-full border border-gray-200 bg-white/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-gray-700 transition hover:bg-gray-50"
-          >
-            Cont
-          </Link>
-
-          {/* Buton Cos - Acum in aceeasi tema ca Favorite */}
-          <Link
-            to="/cart"
-            className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-white/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-gray-700 transition hover:bg-gray-50"
-          >
-            <svg
-              className="h-4 w-4 text-gray-600"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <circle cx="9" cy="20" r="1" />
-              <circle cx="17" cy="20" r="1" />
-              <path d="M3 4h2l2.5 11h11l2-7H7.2" />
-            </svg>
-            Coș
-            {uniqueItems > 0 && (
-              <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-xs font-semibold text-gray-800">
-                {uniqueItems}
-              </span>
-            )}
-          </Link>
-        </div>
-
-        {/* Actiuni vizibile pe mobil */}
-        <div className="flex items-center gap-2 md:hidden shrink-0">
-          {/* Favorite Mobil */}
-          <Link
-            to="/favorite"
-            className="flex items-center justify-center rounded-xl border border-gray-200 bg-white/70 p-2 text-gray-600"
-            aria-label="Favorite"
-          >
-            <svg
-              className="h-4 w-4"
-              fill={favorites.length > 0 ? "currentColor" : "none"}
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-            </svg>
-          </Link>
-
-          {/* Cos Mobil - In aceeasi tema */}
-          <Link
-            to="/cart"
-            className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-white/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-gray-700"
-          >
-            <svg
-              className="h-4 w-4 text-gray-600"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <circle cx="9" cy="20" r="1" />
-              <circle cx="17" cy="20" r="1" />
-              <path d="M3 4h2l2.5 11h11l2-7H7.2" />
-            </svg>
-            Coș
-            {uniqueItems > 0 && (
-              <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-xs font-semibold text-gray-800">
-                {uniqueItems}
-              </span>
-            )}
-          </Link>
-
-          {/* Buton Burger Meniu */}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="rounded-xl border border-gray-200 bg-white/70 p-2 text-black"
-            aria-label="Meniu"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {isOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16m-7 6h7"
-                />
-              )}
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {/* Bara categorii desktop */}
-      <div className="hidden border-t border-gray-100 md:block">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-6 py-2">
-          <div className="relative" ref={productsMenuRef}>
+          {/* Cont */}
+          <div className="relative" ref={accountRef}>
             <button
               type="button"
-              onClick={() => setIsProductsOpen((prev) => !prev)}
-              className="flex items-center gap-2 rounded-full border border-gray-200 bg-white/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-gray-700 transition hover:bg-gray-50"
-              aria-expanded={isProductsOpen}
+              onClick={() => setIsAccountOpen((prev) => !prev)}
+              className={pillLink}
+              aria-expanded={isAccountOpen}
               aria-haspopup="true"
             >
-              <svg
-                className="h-3.5 w-3.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
-              Categorii
-              <svg
-                className="h-3 w-3 text-gray-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.25 7.5L10 12.25 14.75 7.5"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <Icon name="user" className="h-4 w-4" />
+              <span className="hidden lg:inline">
+                {user ? user.email?.split("@")[0] : "Cont"}
+              </span>
+              <Icon name="chevronDown" className="h-3 w-3 text-slate-400" />
             </button>
 
-            {isProductsOpen && (
-              <div className="absolute left-0 z-20 mt-2 w-52 rounded-2xl border border-gray-100 bg-white py-2 shadow-xl backdrop-blur">
-                {categories.map((cat) => (
-                  <button
-                    key={cat.slug}
-                    type="button"
-                    onClick={() => handleCategoryClick(cat.slug)}
-                    className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 hover:text-black"
-                  >
-                    <span
-                      className={`h-3.5 w-3.5 shrink-0 rounded border transition ${
-                        isCategorySelected(cat.slug)
-                          ? "border-black bg-black"
-                          : "border-gray-300 bg-transparent"
-                      }`}
-                      aria-hidden="true"
-                    />
-                    {cat.label}
-                  </button>
-                ))}
+            {isAccountOpen && (
+              <div className="absolute right-0 z-30 mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-lift">
+                {user ? (
+                  <>
+                    <div className="px-3 py-2">
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">
+                        Conectat ca
+                      </p>
+                      <p className="truncate text-sm font-semibold text-ink">
+                        {user.email}
+                      </p>
+                    </div>
+                    <div className="my-1 h-px bg-slate-100" />
+                    <Link
+                      to="/comenzile-mele"
+                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-50 hover:text-ink"
+                    >
+                      <Icon name="truck" className="h-4 w-4" />
+                      Comenzile mele
+                    </Link>
+                    <Link
+                      to="/suport"
+                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-50 hover:text-ink"
+                    >
+                      <Icon name="wrench" className="h-4 w-4" />
+                      Suport
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={signOut}
+                      className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-50 hover:text-ink"
+                    >
+                      <Icon name="logout" className="h-4 w-4" />
+                      Deconectare
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-50 hover:text-ink"
+                    >
+                      <Icon name="user" className="h-4 w-4" />
+                      Autentificare
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-50 hover:text-ink"
+                    >
+                      <Icon name="check" className="h-4 w-4" />
+                      Creează cont
+                    </Link>
+                  </>
+                )}
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat.slug}
-                type="button"
-                onClick={() => handleCategoryClick(cat.slug)}
-                className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] transition ${
-                  isCategorySelected(cat.slug)
-                    ? "bg-black text-white"
-                    : "text-gray-500 hover:text-black"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
+          <Link
+            to="/cart"
+            className="flex items-center gap-1.5 rounded-xl bg-ink px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-volt"
+          >
+            <Icon name="cart" className="h-4 w-4" />
+            Coș
+            {totalItems > 0 && (
+              <span className="rounded-full bg-volt px-1.5 text-[11px] font-bold text-white">
+                {totalItems}
+              </span>
+            )}
+          </Link>
+        </div>
 
-          {/* Reducerile săptămânii */}
+        {/* Acțiuni mobil */}
+        <div className="ml-auto flex shrink-0 items-center gap-2 md:hidden">
+          <Link
+            to="/cart"
+            className="relative flex items-center justify-center rounded-xl bg-ink p-2 text-white"
+            aria-label="Coș"
+          >
+            <Icon name="cart" className="h-4 w-4" />
+            {totalItems > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-volt px-1 text-[10px] font-bold text-white">
+                {totalItems}
+              </span>
+            )}
+          </Link>
+          <button
+            type="button"
+            onClick={() => setIsMobileOpen((prev) => !prev)}
+            className="rounded-xl border border-slate-200 bg-white p-2 text-ink"
+            aria-label="Meniu"
+            aria-expanded={isMobileOpen}
+          >
+            <Icon name={isMobileOpen ? "close" : "menu"} className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Bara de categorii (desktop) */}
+      <div className="hidden border-t border-slate-100 md:block">
+        <div className="mx-auto flex max-w-6xl items-center gap-1 px-6 py-1.5">
+          <NavLink
+            to="/produse"
+            className={({ isActive }) =>
+              `rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                isActive ? "bg-ink text-white" : "text-slate-600 hover:text-ink"
+              }`
+            }
+          >
+            Toate produsele
+          </NavLink>
+
+          {CATEGORIES.map((cat) => (
+            <NavLink
+              key={cat.slug}
+              to={`/categorie/${cat.slug}`}
+              className={({ isActive }) =>
+                `rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                  isActive
+                    ? "bg-ink text-white"
+                    : "text-slate-600 hover:text-ink"
+                }`
+              }
+            >
+              {cat.label}
+            </NavLink>
+          ))}
+
+          <Link
+            to="/suport"
+            className="ml-auto rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:text-ink"
+          >
+            Suport
+          </Link>
+
           <Link
             to="/reduceri"
-            className="ml-auto flex items-center gap-1.5 rounded-full bg-rose-500 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-rose-600"
+            className="flex items-center gap-1.5 rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-rose-600"
           >
-            <svg
-              className="h-3.5 w-3.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
-              <line x1="7" y1="7" x2="7.01" y2="7" />
-            </svg>
+            <Icon name="tag" className="h-3.5 w-3.5" />
             Reduceri
           </Link>
         </div>
       </div>
 
-      {/* Meniu mobil dropdown */}
-      {isOpen && (
-        <div className="border-t border-gray-100 bg-white px-6 py-4 md:hidden">
-          <div className="flex flex-col gap-1">
-            {categories.map((cat) => (
-              <button
-                key={cat.slug}
-                type="button"
-                onClick={() => {
-                  handleCategoryClick(cat.slug);
-                  setIsOpen(false);
-                }}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
-                  isCategorySelected(cat.slug)
-                    ? "bg-gray-100 text-black"
-                    : "text-gray-600 hover:text-black"
-                }`}
-              >
-                <span
-                  className={`h-3.5 w-3.5 shrink-0 rounded border ${
-                    isCategorySelected(cat.slug)
-                      ? "border-black bg-black"
-                      : "border-gray-300"
-                  }`}
-                  aria-hidden="true"
-                />
-                {cat.label}
-              </button>
-            ))}
+      {/* Meniu mobil */}
+      {isMobileOpen && (
+        <div className="border-t border-slate-100 bg-white px-6 py-4 md:hidden">
+          <Search />
+
+          <div className="mt-4 grid gap-1">
             <Link
-              to="/reduceri"
-              onClick={() => setIsOpen(false)}
-              className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-rose-500 px-3 py-2.5 text-sm font-semibold text-white"
+              to="/produse"
+              className="rounded-xl px-3 py-2.5 text-sm font-semibold text-ink hover:bg-slate-50"
             >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
-                <line x1="7" y1="7" x2="7.01" y2="7" />
-              </svg>
-              Reducerile săptămânii
+              Toate produsele
             </Link>
-            <div className="mt-3 flex gap-2 border-t border-gray-100 pt-3">
+            {CATEGORIES.map((cat) => (
               <Link
-                to="/register"
-                className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-xs font-semibold text-gray-600"
+                key={cat.slug}
+                to={`/categorie/${cat.slug}`}
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-ink"
               >
-                Cont
+                <Icon name={cat.icon} className="h-4 w-4 text-volt" />
+                {cat.label}
               </Link>
-              <Link
-                to="/favorite"
-                className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-1.5 text-xs font-semibold text-gray-600"
-              >
-                Favorite
-                {favorites.length > 0 && (
-                  <span className="rounded-full bg-rose-100 px-1.5 text-xs font-semibold text-rose-600">
-                    {favorites.length}
-                  </span>
-                )}
+            ))}
+          </div>
+
+          <Link
+            to="/reduceri"
+            className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-rose-500 px-3 py-2.5 text-sm font-semibold text-white"
+          >
+            <Icon name="tag" className="h-4 w-4" />
+            Reducerile săptămânii
+          </Link>
+
+          <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
+            <Link to="/favorite" className={pillLink}>
+              <Icon name="heart" className="h-4 w-4" />
+              Favorite {favorites.length > 0 ? `(${favorites.length})` : ""}
+            </Link>
+            <Link to="/suport" className={pillLink}>
+              <Icon name="wrench" className="h-4 w-4" />
+              Suport
+            </Link>
+            {user ? (
+              <button type="button" onClick={signOut} className={pillLink}>
+                <Icon name="logout" className="h-4 w-4" />
+                Deconectare
+              </button>
+            ) : (
+              <Link to="/login" className={pillLink}>
+                <Icon name="user" className="h-4 w-4" />
+                Autentificare
               </Link>
-            </div>
+            )}
           </div>
         </div>
       )}
-    </nav>
+    </header>
   );
 };
 

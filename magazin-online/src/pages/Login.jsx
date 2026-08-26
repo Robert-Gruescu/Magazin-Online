@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import Layout from "../components/Layout";
+import Icon from "../components/Icon";
 import supabase from "../services/supabaseClient";
 
-function Login() {
+const inputClass =
+  "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-ink placeholder:text-slate-300 focus:border-volt focus:outline-none focus:ring-2 focus:ring-volt/20";
+
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [state, setState] = useState("idle");
@@ -13,12 +17,6 @@ function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setMessage("");
-
-    if (!supabase) {
-      setState("error");
-      setMessage("Supabase nu este configurat. Verifică .env.local.");
-      return;
-    }
 
     if (!email.trim() || !password) {
       setState("error");
@@ -35,105 +33,99 @@ function Login() {
 
     if (error) {
       setState("error");
-      setMessage(error.message);
+      setMessage(
+        error.message === "Invalid login credentials"
+          ? "Email sau parolă greșită."
+          : error.message,
+      );
       return;
     }
 
     setState("success");
-    setMessage("Autentificare reușită!");
     navigate("/");
   };
 
   const isSubmitting = state === "submitting";
 
   return (
-    <div className="relative min-h-screen overflow-hidden font-sans">
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to right, #f4e8e1 0%, #f7f5f2 52%, #eef2f5 100%)",
-        }}
-      />
-      <div className="absolute left-37.5 top-25 h-125 w-125 rounded-full bg-[#f0d8cb] opacity-25 blur-[120px]" />
-      <div className="absolute right-37.5 top-25 h-125 w-125 rounded-full bg-[#dfe7ee] opacity-25 blur-[120px]" />
-
-      <div className="relative z-10">
-        <Navbar />
-
-        <div className="mx-auto max-w-md px-6 py-16">
-          <header className="text-center">
-            <p className="text-xs uppercase tracking-[0.3em] text-ink/40">
-              Cont client
-            </p>
-            <h1 className="mt-2 font-display text-3xl text-ink sm:text-4xl">
-              Autentificare
-            </h1>
-          </header>
-
-          <form
-            onSubmit={handleSubmit}
-            className="mt-8 rounded-3xl border border-white/60 bg-white/85 p-6 shadow-soft backdrop-blur"
-          >
-            <div className="grid gap-4">
-              <label className="grid gap-2">
-                <span className="text-xs uppercase tracking-[0.2em] text-ink/50">
-                  Email
-                </span>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="adresa@email.com"
-                  className="rounded-2xl border border-ink/10 bg-white/90 px-4 py-3 text-sm"
-                />
-              </label>
-
-              <label className="grid gap-2">
-                <span className="text-xs uppercase tracking-[0.2em] text-ink/50">
-                  Parolă
-                </span>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Parola ta"
-                  className="rounded-2xl border border-ink/10 bg-white/90 px-4 py-3 text-sm"
-                />
-              </label>
-
-              {message ? (
-                <div
-                  className={`rounded-2xl border px-4 py-3 text-sm ${
-                    state === "success"
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                      : "border-rose-200 bg-rose-50 text-rose-800"
-                  }`}
-                >
-                  {message}
-                </div>
-              ) : null}
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="mt-2 w-full rounded-full bg-ink py-3 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isSubmitting ? "Se autentifică..." : "Autentificare"}
-              </button>
-            </div>
-          </form>
-
-          <p className="mt-4 text-center text-xs text-ink/55">
-            Nu ai cont?{" "}
-            <Link to="/register" className="font-semibold text-ink underline">
-              Creează unul aici
-            </Link>
+    <Layout>
+      <div className="mx-auto max-w-md py-12">
+        <header className="text-center">
+          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-ink text-white">
+            <Icon name="user" className="h-5 w-5" />
+          </span>
+          <h1 className="mt-5 font-display text-3xl font-bold text-ink">
+            Bine ai revenit
+          </h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Autentifică-te ca să-ți vezi comenzile și favoritele.
           </p>
-        </div>
+        </header>
+
+        <form
+          onSubmit={handleSubmit}
+          className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-soft"
+        >
+          <div className="grid gap-4">
+            <label className="grid gap-1.5">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-slate-400">
+                Email
+              </span>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="adresa@email.com"
+                autoComplete="email"
+                className={inputClass}
+              />
+            </label>
+
+            <label className="grid gap-1.5">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-slate-400">
+                Parolă
+              </span>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Parola ta"
+                autoComplete="current-password"
+                className={inputClass}
+              />
+            </label>
+
+            {message && (
+              <div
+                className={`rounded-xl border px-4 py-3 text-sm ${
+                  state === "success"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                    : "border-rose-200 bg-rose-50 text-rose-800"
+                }`}
+              >
+                {message}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="mt-1 w-full rounded-xl bg-ink py-3.5 text-sm font-semibold text-white transition hover:bg-volt disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSubmitting ? "Se autentifică…" : "Autentificare"}
+            </button>
+          </div>
+        </form>
+
+        <p className="mt-5 text-center text-sm text-slate-500">
+          Nu ai cont?{" "}
+          <Link to="/register" className="font-semibold text-volt hover:underline">
+            Creează unul aici
+          </Link>
+        </p>
       </div>
-    </div>
+    </Layout>
   );
-}
+};
 
 export default Login;

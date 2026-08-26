@@ -41,6 +41,8 @@ export function CartProvider({ children }) {
           name: product.name,
           price: product.price,
           image_url: product.image_url,
+          brand: product.brand ?? null,
+          sku: product.sku ?? null,
           stock: product.stock ?? null,
           quantity: capToStock(quantity, product.stock),
         },

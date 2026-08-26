@@ -27,8 +27,11 @@ export function FavoritesProvider({ children }) {
           price: product.price,
           image_url: product.image_url,
           description: product.description,
-          bio: product.bio,
-          fara_zahar: product.fara_zahar,
+          brand: product.brand ?? null,
+          pret_vechi: product.pret_vechi ?? null,
+          garantie_luni: product.garantie_luni ?? null,
+          rating: product.rating ?? null,
+          stock: product.stock ?? null,
         },
       ];
     });
