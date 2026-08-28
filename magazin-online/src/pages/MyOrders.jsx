@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
+import Seo from "../components/Seo";
 import Icon from "../components/Icon";
 import { useAuth } from "../context/AuthContext";
 import { fetchMyOrders, itemLabel, itemTotal } from "../services/orders";
@@ -40,6 +41,7 @@ const MyOrders = () => {
   if (!authLoading && !user) {
     return (
       <Layout>
+      <Seo title="Comenzile mele" noindex />
         <div className="py-24 text-center">
           <Icon name="user" className="mx-auto h-10 w-10 text-slate-300" />
           <h1 className="mt-4 font-display text-2xl font-bold text-ink">

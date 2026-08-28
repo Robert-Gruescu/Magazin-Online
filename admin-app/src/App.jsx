@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import AddProduct from "./pages/AddProduct";
 import Products from "./pages/Products";
 import ProductImages from "./pages/ProductImages";
+import EditProduct from "./pages/EditProduct";
 import Orders from "./pages/Orders";
 import WeeklyDeals from "./pages/WeeklyDeals";
 
@@ -20,6 +21,7 @@ function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/products" element={<Products />} />
               <Route path="/products/new" element={<AddProduct />} />
+              <Route path="/products/:id/edit" element={<EditProduct />} />
               <Route path="/products/:id/images" element={<ProductImages />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/deals" element={<WeeklyDeals />} />

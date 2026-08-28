@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
+import Seo from "../components/Seo";
 import Icon from "../components/Icon";
 import { useAuth } from "../context/AuthContext";
 import { useChat } from "../hooks/useChat";
@@ -91,6 +92,21 @@ const Support = () => {
 
   return (
     <Layout>
+      <Seo
+        title="Suport clienți"
+        description="Verifică statusul comenzii, află cum funcționează returul și garanția sau vorbește cu echipa VoltMag."
+        path="/suport"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: FAQ.map((item) => ({
+            "@type": "Question",
+            name: item.q,
+            acceptedAnswer: { "@type": "Answer", text: item.a },
+          })),
+        }}
+      />
+
       {/* Antet */}
       <header className="relative overflow-hidden rounded-3xl bg-ink px-8 py-12 text-white">
         <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-volt/25 blur-[100px]" />

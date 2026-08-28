@@ -11,26 +11,29 @@ const initialForm = {
   validUntil: "",
 };
 
+const cereDeals = () =>
+  supabase
+    .from("weekly_deals")
+    .select("id, name, old_price, price, valid_until, created_at")
+    .order("created_at", { ascending: false });
+
 function WeeklyDeals() {
   const [formValues, setFormValues] = useState(initialForm);
   const [deals, setDeals] = useState([]);
-  const [listState, setListState] = useState("idle");
+  const [listState, setListState] = useState(
+    isSupabaseConfigured && supabase ? "loading" : "missing",
+  );
   const [submitState, setSubmitState] = useState("idle");
   const [submitMessage, setSubmitMessage] = useState("");
 
   const supabaseReady = Boolean(isSupabaseConfigured && supabase);
 
+  // Reimprospatarea de dupa salvare. Nu trece prin "loading": lista ramane
+  // vizibila cat timp se reincarca, fara palpaire.
   const loadDeals = async () => {
-    if (!supabaseReady) {
-      setListState("missing");
-      return;
-    }
-    setListState("loading");
-    const { data, error } = await supabase
-      .from("weekly_deals")
-      .select("id, name, old_price, price, valid_until, created_at")
-      .order("created_at", { ascending: false });
+    if (!supabaseReady) return;
 
+    const { data, error } = await cereDeals();
     if (error) {
       setListState("error");
       return;
@@ -40,8 +43,22 @@ function WeeklyDeals() {
   };
 
   useEffect(() => {
-    loadDeals();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!supabaseReady) return;
+
+    let active = true;
+    cereDeals().then(({ data, error }) => {
+      if (!active) return;
+      if (error) {
+        setListState("error");
+        return;
+      }
+      setDeals(data ?? []);
+      setListState("ready");
+    });
+
+    return () => {
+      active = false;
+    };
   }, [supabaseReady]);
 
   const handleChange = (field) => (event) => {

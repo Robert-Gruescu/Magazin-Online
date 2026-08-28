@@ -65,9 +65,12 @@ export function useChat({ endpoint, greeting, buildPayload }) {
         }
 
         if (!response.ok || !data) {
-          if (response.status === 404) {
+          // Sub `npm run dev`, Vite serveste fisierele din api/ ca text simplu
+          // (cod sursa) sau intoarce index.html, ambele cu HTTP 200. Deci
+          // semnalul real nu e codul de stare, ci faptul ca raspunsul nu e JSON.
+          if (data === null) {
             setError(
-              `Ruta ${endpoint} nu răspunde. Funcțiile din api/ rulează pe Vercel, nu în serverul Vite — pornește proiectul cu "vercel dev" sau testează pe deployment.`,
+              `Ruta ${endpoint} nu a răspuns cu JSON. Funcțiile din api/ nu rulează. Serverul Vite (npm run dev) nu le execută — pornește proiectul cu "vercel dev" sau testează pe deployment.`,
             );
           } else if (data?.error) {
             setError(data.error);

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
+import Seo from "../components/Seo";
 import Icon from "../components/Icon";
 import supabase from "../services/supabaseClient";
 
@@ -79,6 +80,7 @@ const Register = () => {
 
   return (
     <Layout>
+      <Seo title="Creează cont" noindex />
       <div className="mx-auto max-w-lg py-12">
         <header className="text-center">
           <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-ink text-white">

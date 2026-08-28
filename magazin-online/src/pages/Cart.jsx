@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
+import Seo from "../components/Seo";
 import Icon from "../components/Icon";
 import { useCart } from "../context/CartContext";
 import { formatPrice } from "../lib/format";
@@ -14,6 +15,7 @@ const Cart = () => {
   if (items.length === 0) {
     return (
       <Layout>
+      <Seo title="Coșul tău" noindex />
         <div className="py-24 text-center">
           <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-white">
             <Icon name="cart" className="h-7 w-7 text-slate-300" />

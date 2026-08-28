@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
+import Seo from "../components/Seo";
 import Icon from "../components/Icon";
 import ProductCard from "../components/ProductCard";
 import { useCart } from "../context/CartContext";
@@ -17,6 +18,7 @@ const Favorites = () => {
 
   return (
     <Layout>
+      <Seo title="Favorite" noindex />
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-volt">

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
+import Seo from "../components/Seo";
 import Icon from "../components/Icon";
 import supabase from "../services/supabaseClient";
 
@@ -49,6 +50,7 @@ const Login = () => {
 
   return (
     <Layout>
+      <Seo title="Autentificare" noindex />
       <div className="mx-auto max-w-md py-12">
         <header className="text-center">
           <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-ink text-white">

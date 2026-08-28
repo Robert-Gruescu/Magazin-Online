@@ -52,6 +52,7 @@ const Category = () => {
       <Catalog
         key={category.id}
         categoryId={category.id}
+        seoPath={`/categorie/${slug}`}
         title={configEntry?.label || category.name}
         subtitle={configEntry?.blurb}
         breadcrumb={

@@ -22,7 +22,9 @@ const initialForm = {
 function AddProduct() {
   const [formValues, setFormValues] = useState(initialForm);
   const [categories, setCategories] = useState([]);
-  const [categoriesState, setCategoriesState] = useState("idle");
+  const [categoriesState, setCategoriesState] = useState(
+    isSupabaseConfigured && supabase ? "loading" : "missing",
+  );
   const [submitState, setSubmitState] = useState("idle");
   const [submitMessage, setSubmitMessage] = useState("");
   // Imaginile alese inainte de salvare; se urca dupa ce produsul primeste un id.
@@ -32,13 +34,9 @@ function AddProduct() {
   const supabaseReady = Boolean(isSupabaseConfigured && supabase);
 
   useEffect(() => {
-    if (!supabaseReady) {
-      setCategoriesState("missing");
-      return;
-    }
+    if (!supabaseReady) return;
 
     let active = true;
-    setCategoriesState("loading");
 
     const loadCategories = async () => {
       const { data, error } = await supabase

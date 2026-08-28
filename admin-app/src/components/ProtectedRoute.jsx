@@ -3,14 +3,15 @@ import { Navigate } from "react-router-dom";
 import { supabase, isSupabaseConfigured } from "../supabaseClient";
 
 function ProtectedRoute({ children }) {
-  const [status, setStatus] = useState("checking");
+  // Starea initiala se deduce direct din configurare: fara Supabase accesul e
+  // refuzat inca de la prima randare, fara o randare intermediara inutila.
+  const [status, setStatus] = useState(
+    isSupabaseConfigured && supabase ? "checking" : "denied",
+  );
   const resolvedRef = useRef(false);
 
   useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) {
-      setStatus("denied");
-      return;
-    }
+    if (!isSupabaseConfigured || !supabase) return;
 
     const checkSession = async (session) => {
       if (!session) {

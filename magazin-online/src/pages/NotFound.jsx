@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
+import Seo from "../components/Seo";
 import Icon from "../components/Icon";
 import { CATEGORIES } from "../config/site";
 
 const NotFound = () => (
   <Layout>
+      <Seo title="Pagina nu a fost găsită" noindex />
     <div className="mx-auto max-w-2xl py-24 text-center">
       <p className="font-display text-6xl font-bold text-slate-200">404</p>
       <h1 className="mt-4 font-display text-2xl font-bold text-ink">

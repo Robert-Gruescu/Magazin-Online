@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Layout from "../components/Layout";
+import Seo from "../components/Seo";
 import Icon from "../components/Icon";
 import ProductCard from "../components/ProductCard";
 import { useCart } from "../context/CartContext";
@@ -149,6 +150,37 @@ const Product = () => {
 
   return (
     <Layout>
+      <Seo
+        title={product.name}
+        description={
+          product.description ||
+          `${product.name}${product.brand ? ` de la ${product.brand}` : ""} — ${formatPrice(product.price)}. Garanție, factură și livrare în 24-48h.`
+        }
+        path={`/produs/${product.id}`}
+        image={currentImage?.url}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: product.name,
+          description: product.description || undefined,
+          sku: product.sku || undefined,
+          brand: product.brand ? { "@type": "Brand", name: product.brand } : undefined,
+          image: gallery.map((g) => g.url).filter(Boolean),
+          aggregateRating:
+            Number(product.rating) > 0
+              ? { "@type": "AggregateRating", ratingValue: Number(product.rating), bestRating: 5, ratingCount: 1 }
+              : undefined,
+          offers: {
+            "@type": "Offer",
+            price: Number(product.price),
+            priceCurrency: "RON",
+            availability: outOfStock
+              ? "https://schema.org/OutOfStock"
+              : "https://schema.org/InStock",
+          },
+        }}
+      />
+
       {/* Breadcrumb */}
       <nav className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-slate-400">
         <Link to="/" className="transition hover:text-volt">

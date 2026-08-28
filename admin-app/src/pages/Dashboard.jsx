@@ -42,34 +42,36 @@ const alerts = [
 const recentProductsFallback = [];
 
 function Dashboard() {
-  const [supabaseState, setSupabaseState] = useState("idle");
+  const supabaseReady = Boolean(isSupabaseConfigured && supabase);
+
+  // Ambele stari pornesc din configurare, nu dintr-un "idle" corectat imediat
+  // dupa prima randare.
+  const [supabaseState, setSupabaseState] = useState(
+    supabaseReady ? "checking" : "missing",
+  );
   const [metrics, setMetrics] = useState(metricsFallback);
   const [recentProducts, setRecentProducts] = useState(recentProductsFallback);
-  const [dataState, setDataState] = useState("idle");
+  const [dataState, setDataState] = useState(
+    supabaseReady ? "loading" : "missing",
+  );
 
   useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) {
-      setSupabaseState("missing");
-      setDataState("missing");
-      return;
-    }
+    if (!supabaseReady) return;
 
     let active = true;
 
     const checkSupabase = async () => {
-      setSupabaseState("checking");
       try {
         const { error } = await supabase.auth.getSession();
         if (!active) return;
         setSupabaseState(error ? "error" : "ready");
-      } catch (err) {
+      } catch {
         if (!active) return;
         setSupabaseState("error");
       }
     };
 
     const loadDashboard = async () => {
-      setDataState("loading");
       const now = new Date();
       const startOfDay = new Date(
         Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
@@ -123,7 +125,7 @@ function Dashboard() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [supabaseReady]);
 
   const supabaseBadge = useMemo(() => {
     const states = {

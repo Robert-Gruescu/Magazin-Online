@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
+import Seo from "../components/Seo";
 import Icon from "../components/Icon";
 import supabase from "../services/supabaseClient";
 import { discountPercent, formatPrice } from "../lib/format";
@@ -68,6 +69,12 @@ const WeeklyDeals = () => {
 
   return (
     <Layout>
+      <Seo
+        title="Reducerile săptămânii"
+        description="Ofertele săptămânii la electronice: laptopuri, telefoane, componente PC și gaming, cu reduceri de până la 40%."
+        path="/reduceri"
+      />
+
       {/* Antet */}
       <div className="relative overflow-hidden rounded-3xl bg-ink px-8 py-12 text-white">
         <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-rose-500/25 blur-[100px]" />

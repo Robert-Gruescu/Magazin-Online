@@ -200,12 +200,20 @@ function Products() {
                     {imageCount} img
                   </span>
 
-                  <Link
-                    to={`/products/${product.id}/images`}
-                    className="rounded-xl border border-ink/10 bg-white px-3 py-2 text-xs font-semibold text-ink/70 hover:text-ink"
-                  >
-                    Imagini
-                  </Link>
+                  <div className="flex gap-2">
+                    <Link
+                      to={`/products/${product.id}/edit`}
+                      className="rounded-xl bg-ink px-3 py-2 text-xs font-semibold text-white hover:bg-ink/80"
+                    >
+                      Editeaza
+                    </Link>
+                    <Link
+                      to={`/products/${product.id}/images`}
+                      className="rounded-xl border border-ink/10 bg-white px-3 py-2 text-xs font-semibold text-ink/70 hover:text-ink"
+                    >
+                      Imagini
+                    </Link>
+                  </div>
                 </div>
               );
             })}

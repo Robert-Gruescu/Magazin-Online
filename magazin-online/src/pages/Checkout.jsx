@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
+import Seo from "../components/Seo";
 import Icon from "../components/Icon";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -107,6 +108,7 @@ const Checkout = () => {
   if (confirmation) {
     return (
       <Layout>
+      <Seo title="Finalizare comandă" noindex />
         <div className="mx-auto max-w-lg py-20 text-center">
           <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
             <Icon name="check" className="h-8 w-8" />

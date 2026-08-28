@@ -3,6 +3,7 @@ import Catalog from "./Catalog";
 
 const Products = () => (
   <Catalog
+    seoPath="/produse"
     title="Toate produsele"
     subtitle="livrare în 24–48h"
     breadcrumb={

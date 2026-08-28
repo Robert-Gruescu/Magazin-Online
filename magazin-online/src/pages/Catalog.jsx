@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Layout from "../components/Layout";
+import Seo from "../components/Seo";
 import Icon from "../components/Icon";
 import ProductCard from "../components/ProductCard";
 import Filter from "../components/Filter";
@@ -21,7 +22,13 @@ const SORT_OPTIONS = [
  * Catalogul (/produse). Filtrarea, sortarea și paginarea se fac în Postgres,
  * nu în browser — pagina rămâne rapidă și la mii de produse.
  */
-const Catalog = ({ categoryId = null, title, subtitle, breadcrumb = null }) => {
+const Catalog = ({
+  categoryId = null,
+  title,
+  subtitle,
+  breadcrumb = null,
+  seoPath = null,
+}) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [products, setProducts] = useState([]);
@@ -126,6 +133,17 @@ const Catalog = ({ categoryId = null, title, subtitle, breadcrumb = null }) => {
 
   return (
     <Layout>
+      <Seo
+        title={search ? `Rezultate pentru „${search}”` : title}
+        description={
+          subtitle
+            ? `${title} — ${subtitle}. Livrare în 24-48h, garanție și retur în 30 de zile.`
+            : undefined
+        }
+        path={search ? null : seoPath}
+        noindex={Boolean(search) || page > 1}
+      />
+
       {/* Antet */}
       <header>
         {breadcrumb}

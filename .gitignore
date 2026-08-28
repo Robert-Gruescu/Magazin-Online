@@ -3,46 +3,82 @@
 # Fiecare aplicatie are si propriul .gitignore pentru node_modules si dist.
 # ============================================================================
 
-# Documentatie generata local (Word / PDF)
+# ---------------------------------------------------------------------------
+# DOCUMENTATIE SI FISIERE PENTRU ASISTENTI AI
+# Raman locale, nu ajung pe GitHub. Depozitul public contine doar cod si
+# README-uri minimale.
+# ---------------------------------------------------------------------------
+
+# Documentatie generata (Word, PDF, alte formate de birou)
 Documentatie-VoltMag.docx
 *.docx
+*.doc
 *.pdf
+*.odt
+*.rtf
+*.pptx
+*.xlsx
 
-# Scripturi SQL rulate manual in Supabase (migrari, seed)
+# Folder de documentatie, daca apare vreodata
+docs/
+documentatie/
+
+# Claude Code
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+.claude.json
+
+# Alti asistenti AI (in caz ca se schimba unealta)
+AGENTS.md
+.cursorrules
+.cursor/
+.aider*
+.continue/
+.github/copilot-instructions.md
+
+# ---------------------------------------------------------------------------
+# BAZA DE DATE
+# Scripturile se ruleaza manual in Supabase. Tine-le intr-un backup separat:
+# nefiind versionate, exista doar pe acest calculator.
+# ---------------------------------------------------------------------------
 *.sql
 sql/
 
-# Fisiere temporare Word/Office (blocaje si autosave)
-~$*
-*.tmp
-
-# Variabile de mediu — NU trebuie sa ajunga niciodata in git
+# ---------------------------------------------------------------------------
+# SECRETE — nu trebuie sa ajunga niciodata in git
+# ---------------------------------------------------------------------------
 .env
 .env.*
 !.env.example
 
-# Dependinte si build-uri
+# ---------------------------------------------------------------------------
+# DEPENDINTE SI BUILD
+# ---------------------------------------------------------------------------
 node_modules/
 dist/
 dist-ssr/
 .vite/
-
-# Vercel
 .vercel
 
-# Loguri
+# ---------------------------------------------------------------------------
+# LOGURI
+# ---------------------------------------------------------------------------
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
 
-# Editor si sistem de operare
+# ---------------------------------------------------------------------------
+# EDITOR SI SISTEM DE OPERARE
+# ---------------------------------------------------------------------------
 .vscode/*
 !.vscode/extensions.json
 .idea/
 .DS_Store
 Thumbs.db
+~$*
+*.tmp
 *.suo
 *.sw?
-.env*

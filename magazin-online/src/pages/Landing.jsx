@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
+import Seo from "../components/Seo";
 import Icon from "../components/Icon";
 import ProductCard from "../components/ProductCard";
 import { CATEGORIES, SITE, TRUST_POINTS } from "../config/site";
@@ -48,6 +49,18 @@ const Landing = () => {
 
   return (
     <Layout bare>
+      <Seo
+        path="/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Store",
+          name: SITE.name,
+          description: SITE.description,
+          email: SITE.email,
+          telephone: SITE.phone,
+          address: SITE.address,
+        }}
+      />
       {/* ---------------- HERO ---------------- */}
       <section className="relative overflow-hidden bg-ink text-white">
         <div className="absolute -left-20 -top-20 h-96 w-96 rounded-full bg-volt/30 blur-[120px]" />

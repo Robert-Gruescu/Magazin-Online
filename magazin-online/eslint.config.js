@@ -19,8 +19,9 @@ export default defineConfig([
     },
   },
   {
-    // Funcțiile serverless rulează în Node, nu în browser.
-    files: ['api/**/*.js'],
+    // Cod care rulează în Node, nu în browser: funcțiile serverless și
+    // fișierele de configurare / plugin ale lui Vite.
+    files: ['api/**/*.js', 'vite.config.js', 'vite-plugin-api.js'],
     languageOptions: { globals: globals.node },
   },
   {
